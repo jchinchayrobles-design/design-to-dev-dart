@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { ArrowUpRight, Paperclip, X } from "lucide-react";
 import { ConsultProgress } from "@/components/hz/ConsultProgress";
+import { UploadTray } from "@/components/hz/UploadTray";
 import { Button } from "@/components/ui/button";
 import { Highlighted, PageHead, Pill } from "@/components/hz/ui";
 import { services, type ConsultStage } from "@/services";
@@ -33,6 +34,7 @@ function Consultor() {
   const [stage, setStage] = useState<ConsultStage>("consulta");
   const [caseFiles, setCaseFiles] = useState<File[]>([]);
   const [dragging, setDragging] = useState(false);
+  const [trayOpen, setTrayOpen] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const addFiles = (list: FileList | null) => {
     if (!list) return;
@@ -120,6 +122,16 @@ function Consultor() {
           </div>
         )}
         <input ref={fileInput} type="file" multiple hidden accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
+        <UploadTray
+          open={trayOpen}
+          onOpenChange={setTrayOpen}
+          title="Documentos del caso"
+          description="Sube los Excel, PDF o Word de tu caso y corrobora los nombres antes de contrastarlos con la normativa."
+          confirmLabel="Usar"
+          readyLabel="Listo para contraste"
+          initialFiles={caseFiles}
+          onConfirm={setCaseFiles}
+        />
         <textarea
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
@@ -140,8 +152,8 @@ function Consultor() {
             {services.mode === "demo" ? "Respuestas predefinidas de demostración · no verificadas" : "Conectado a la biblioteca documental"}
           </span>
           <div className="flex items-center gap-2">
-            <Button type="button" variant="outline" className="rounded-full" onClick={() => fileInput.current?.click()} disabled={ask.isPending}>
-              <Paperclip /> Adjuntar caso
+            <Button type="button" variant="outline" className="rounded-full" onClick={() => setTrayOpen(true)} disabled={ask.isPending}>
+              <Paperclip /> {caseFiles.length ? `Ver bandeja (${caseFiles.length})` : "Adjuntar caso"}
             </Button>
             <Button type="submit" className="rounded-full" disabled={(!question.trim() && !caseFiles.length) || ask.isPending}>
               {caseFiles.length ? "Contrastar" : "Consultar"} <ArrowUpRight />
