@@ -80,84 +80,87 @@ export function CaseResult({ answer }: { answer: ConsultAnswer }) {
         </div>
       </section>
 
-      {/* 3. Acciones prioritarias */}
-      {(c.actions?.length ?? 0) > 0 && (
-        <section className="rounded-[18px] border border-border bg-card p-5 shadow-soft">
-          <h3 className="mb-2.5 text-[14px] font-semibold">Qué hacer ahora</h3>
-          <ol className="space-y-2">
-            {[...c.actions!].sort((a, b) => ["alta", "media", "baja"].indexOf(a.priority) - ["alta", "media", "baja"].indexOf(b.priority)).map((a, i) => (
-              <li key={i} className="flex items-start gap-3 text-[13px] leading-relaxed">
-                <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">{i + 1}</span>
-                <span className="min-w-0 flex-1">{a.text}</span>
-                <span className="flex shrink-0 items-center gap-2">
-                  <Pill tone={prioTone[a.priority]}>Prioridad {a.priority}</Pill>
-                  {a.findingIndex !== null && (
-                    <button type="button" onClick={() => focus(a.findingIndex!)} className="text-[10px] text-foreground underline">Ver hallazgo</button>
-                  )}
-                </span>
-              </li>
-            ))}
-          </ol>
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)]">
+        {/* Columna principal: hallazgos */}
+        <section className="min-w-0">
+          <div className="mb-2 flex items-center justify-between px-1">
+            <h3 className="text-[14px] font-semibold">Hallazgos {filter && <span className="font-normal text-muted-foreground">· {statusMeta[filter].label}</span>}</h3>
+            {filter && <button type="button" onClick={() => setFilter(null)} className="text-[11px] underline">Ver todos</button>}
+          </div>
+          {c.items.length === 0 && <p className="px-1 text-[12px] text-muted-foreground">El análisis no produjo hallazgos.</p>}
+          <div className="space-y-2.5">
+            {order.map((i) => <FindingCard key={i} id={`hallazgo-${i}`} item={c.items[i]!} isCase={isCase} />)}
+          </div>
         </section>
-      )}
 
-      {/* 4. Hallazgos */}
-      <section>
-        <div className="mb-2 flex items-center justify-between px-1">
-          <h3 className="text-[14px] font-semibold">Hallazgos {filter && <span className="font-normal text-muted-foreground">· {statusMeta[filter].label}</span>}</h3>
-          {filter && <button type="button" onClick={() => setFilter(null)} className="text-[11px] underline">Ver todos</button>}
-        </div>
-        {c.items.length === 0 && <p className="px-1 text-[12px] text-muted-foreground">El análisis no produjo hallazgos.</p>}
-        <div className="space-y-2.5">
-          {order.map((i) => <FindingCard key={i} id={`hallazgo-${i}`} item={c.items[i]!} isCase={isCase} />)}
-        </div>
-      </section>
+        {/* Panel lateral de acción */}
+        <aside className="space-y-3 lg:sticky lg:top-4">
+          {(c.actions?.length ?? 0) > 0 && (
+            <section className="rounded-[18px] border border-border bg-card p-4 shadow-soft">
+              <h3 className="mb-2.5 text-[13px] font-semibold">Qué hacer ahora</h3>
+              <ol className="space-y-2.5">
+                {[...c.actions!].sort((a, b) => ["alta", "media", "baja"].indexOf(a.priority) - ["alta", "media", "baja"].indexOf(b.priority)).map((a, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-[12px] leading-relaxed">
+                    <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">{i + 1}</span>
+                    <div className="min-w-0 flex-1">
+                      <p>{a.text}</p>
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
+                        <Pill tone={prioTone[a.priority]}>Prioridad {a.priority}</Pill>
+                        {a.findingIndex !== null && (
+                          <button type="button" onClick={() => focus(a.findingIndex!)} className="text-[10px] text-foreground underline">Ver hallazgo</button>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
 
-      {/* 5. Información faltante */}
-      {(c.missingInfo?.length ?? 0) > 0 && (
-        <section className="rounded-[18px] border border-border bg-card p-5 shadow-soft">
-          <h3 className="mb-2 text-[14px] font-semibold">Información que falta para cerrar el caso</h3>
-          <ul className="space-y-1.5 text-[13px]">
-            {c.missingInfo!.map((m) => (
-              <li key={m} className="flex gap-2"><span aria-hidden className="text-muted-foreground">☐</span>{m}</li>
-            ))}
-          </ul>
-        </section>
-      )}
+          {(c.missingInfo?.length ?? 0) > 0 && (
+            <section className="rounded-[18px] border border-border bg-card p-4 shadow-soft">
+              <h3 className="mb-2 text-[13px] font-semibold">Información faltante</h3>
+              <ul className="space-y-1.5 text-[12px]">
+                {c.missingInfo!.map((m) => (
+                  <li key={m}><label className="flex cursor-pointer gap-2"><input type="checkbox" className="mt-0.5 accent-primary" />{m}</label></li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-      {/* 6. Normativa usada */}
-      {(c.normNames?.length ?? 0) > 0 && (
-        <section className="rounded-[18px] border border-border bg-card p-5 shadow-soft">
-          <h3 className="mb-2 text-[14px] font-semibold">Normativa consultada</h3>
-          <ul className="space-y-1.5">
-            {c.normNames!.map((n) => (
-              <li key={n.id} className="flex flex-wrap items-center justify-between gap-2 text-[12px]">
-                <span className="min-w-0 truncate">{n.name}</span>
-                <span className="flex items-center gap-2">
-                  <Pill tone="amber">Vigencia pendiente de validación</Pill>
-                  <Link to="/biblioteca/$code" params={{ code: n.id }} className="text-[11px] underline">Ver ficha</Link>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+          {(c.normNames?.length ?? 0) > 0 && (
+            <section className="rounded-[18px] border border-border bg-card p-4 shadow-soft">
+              <h3 className="mb-2 text-[13px] font-semibold">Normativa aplicada</h3>
+              <ul className="space-y-2">
+                {c.normNames!.map((n) => (
+                  <li key={n.id} className="rounded-xl bg-secondary px-3 py-2 text-[12px]">
+                    <div className="truncate font-medium">{n.name}</div>
+                    <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+                      <Pill tone="amber">Vigencia pendiente de validación</Pill>
+                      <Link to="/biblioteca/$code" params={{ code: n.id }} className="text-[11px] underline">Ver ficha</Link>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-      {/* 7. Advertencias */}
-      {answer.warnings.length > 0 && (
-        <section className="rounded-xl bg-warning-soft px-4 py-3 text-[12px] leading-relaxed text-warning">
-          <strong className="mb-1 block">Advertencias</strong>
-          <ul className="list-disc space-y-0.5 pl-5">{answer.warnings.map((w) => <li key={w}>{w}</li>)}</ul>
-        </section>
-      )}
+          {answer.warnings.length > 0 && (
+            <section className="rounded-[18px] bg-warning-soft px-4 py-3 text-[12px] leading-relaxed text-warning">
+              <strong className="mb-1 block">Advertencias técnicas</strong>
+              <ul className="list-disc space-y-0.5 pl-5">{answer.warnings.map((w) => <li key={w}>{w}</li>)}</ul>
+            </section>
+          )}
+        </aside>
+      </div>
     </article>
   );
 }
 
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
+function Block({ label, tone, children }: { label: string; tone?: "warn" | "action"; children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-[150px_1fr] gap-3 border-t border-border py-2 text-[12px] leading-relaxed max-sm:grid-cols-1 max-sm:gap-0.5">
-      <div className="font-semibold text-muted-foreground">{label}</div>
+    <div className={cn("rounded-xl px-3 py-2.5 text-[12px] leading-relaxed", tone === "warn" ? "bg-warning-soft" : tone === "action" ? "border border-primary/30 bg-accent" : "bg-secondary")}>
+      <div className="eyebrow mb-1">{label}</div>
       <div className="text-secondary-foreground">{children}</div>
     </div>
   );
@@ -175,27 +178,33 @@ function FindingCard({ id, item, isCase }: { id: string; item: ContrastItem; isC
         <ChevronDown className={cn("size-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} />
       </button>
       {open && (
-        <div className="px-4 pb-4">
-          {item.observed && <Row label={isCase ? "Qué dice el caso" : "Punto consultado"}>{item.observed}</Row>}
-          {(item.expected || item.rule) && (
-            <Row label="Qué exige la norma">
-              {item.expected ?? item.rule}
-              {item.expected && item.rule && <div className="mt-0.5 text-[11px] text-muted-foreground">{item.rule}</div>}
-              {item.quote && (
-                <blockquote className="mt-2 rounded-r-[10px] border-l-[3px] border-primary bg-quote px-3 py-2 text-[12px] leading-[1.7]">
-                  “{item.quote}”
-                  <div className="mt-1 flex flex-wrap items-center justify-between gap-2 text-[10px] text-muted-foreground">
-                    <span>{item.documentName}{item.location ? ` · ${item.location}` : ""} · Cita verificada en el texto</span>
-                    {item.code && <Link to="/biblioteca/$code" params={{ code: item.code }} className="text-foreground underline">Ver normativa</Link>}
-                  </div>
-                </blockquote>
+        <div className="space-y-2.5 border-t border-border px-4 pb-4 pt-3">
+          {(item.observed || item.expected || item.rule) && (
+            <div className="grid gap-2.5 md:grid-cols-2">
+              {item.observed && (
+                <Block label={isCase ? "Lo que dice el caso" : "Punto consultado"}>{item.observed}</Block>
               )}
-            </Row>
+              {(item.expected || item.rule) && (
+                <Block label="Lo que exige la norma">
+                  {item.expected ?? item.rule}
+                  {item.expected && item.rule && <div className="mt-0.5 text-[11px] text-muted-foreground">{item.rule}</div>}
+                </Block>
+              )}
+            </div>
           )}
-          {item.gap && <Row label="Diferencia encontrada">{item.gap}</Row>}
-          {item.action && <Row label="Qué hacer"><strong className="font-semibold text-foreground">{item.action}</strong></Row>}
-          {item.missing && <Row label="Qué falta para concluir">{item.missing}</Row>}
-          {(legacy || item.status === "sin_evidencia") && item.note && <Row label="Nota">{item.note}</Row>}
+          {item.quote && (
+            <blockquote className="rounded-r-[10px] border-l-[3px] border-primary bg-quote px-3 py-2 text-[12px] leading-[1.7]">
+              “{item.quote}”
+              <div className="mt-1 flex flex-wrap items-center justify-between gap-2 text-[10px] text-muted-foreground">
+                <span>{item.documentName}{item.location ? ` · ${item.location}` : ""} · Cita verificada en el texto</span>
+                {item.code && <Link to="/biblioteca/$code" params={{ code: item.code }} className="text-foreground underline">Ver normativa</Link>}
+              </div>
+            </blockquote>
+          )}
+          {item.gap && <Block label="Brecha / diferencia" tone="warn">{item.gap}</Block>}
+          {item.action && <Block label="Acción requerida" tone="action"><strong className="font-semibold text-foreground">{item.action}</strong></Block>}
+          {item.missing && <Block label="Qué falta para concluir">{item.missing}</Block>}
+          {(legacy || item.status === "sin_evidencia") && item.note && <Block label="Nota">{item.note}</Block>}
         </div>
       )}
     </div>
