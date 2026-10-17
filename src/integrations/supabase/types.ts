@@ -16,14 +16,19 @@ export type Database = {
     Tables: {
       contrast_findings: {
         Row: {
+          action: string | null
           case_fact: string
           contrast_id: string
           created_at: string
           document_id: string | null
           document_name: string | null
+          expected: string | null
+          gap: string | null
           id: string
           location: string | null
+          missing: string | null
           note: string
+          observed: string | null
           position: number
           quote: string | null
           rule: string
@@ -32,14 +37,19 @@ export type Database = {
           verified: boolean
         }
         Insert: {
+          action?: string | null
           case_fact: string
           contrast_id: string
           created_at?: string
           document_id?: string | null
           document_name?: string | null
+          expected?: string | null
+          gap?: string | null
           id?: string
           location?: string | null
+          missing?: string | null
           note?: string
+          observed?: string | null
           position?: number
           quote?: string | null
           rule?: string
@@ -48,14 +58,19 @@ export type Database = {
           verified?: boolean
         }
         Update: {
+          action?: string | null
           case_fact?: string
           contrast_id?: string
           created_at?: string
           document_id?: string | null
           document_name?: string | null
+          expected?: string | null
+          gap?: string | null
           id?: string
           location?: string | null
+          missing?: string | null
           note?: string
+          observed?: string | null
           position?: number
           quote?: string | null
           rule?: string
@@ -75,11 +90,14 @@ export type Database = {
       }
       contrasts: {
         Row: {
+          actions: Json | null
           case_document_ids: string[]
+          conclusion: string | null
           created_at: string
           id: string
           interpretation: string | null
           level: string
+          missing_info: Json | null
           norm_document_ids: string[]
           question: string
           summary: Json
@@ -88,11 +106,14 @@ export type Database = {
           warnings: Json
         }
         Insert: {
+          actions?: Json | null
           case_document_ids?: string[]
+          conclusion?: string | null
           created_at?: string
           id?: string
           interpretation?: string | null
           level?: string
+          missing_info?: Json | null
           norm_document_ids?: string[]
           question: string
           summary?: Json
@@ -101,11 +122,14 @@ export type Database = {
           warnings?: Json
         }
         Update: {
+          actions?: Json | null
           case_document_ids?: string[]
+          conclusion?: string | null
           created_at?: string
           id?: string
           interpretation?: string | null
           level?: string
+          missing_info?: Json | null
           norm_document_ids?: string[]
           question?: string
           summary?: Json

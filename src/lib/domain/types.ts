@@ -111,10 +111,21 @@ export interface ContrastItem {
   quote?: string | null;
   location?: string | null;
   verified?: boolean;
+  observed?: string | null;
+  expected?: string | null;
+  gap?: string | null;
+  action?: string | null;
+  missing?: string | null;
 }
+
+export interface ContrastAction { text: string; priority: "alta" | "media" | "baja"; findingIndex: number | null }
 
 export interface CaseContrast {
   fileNames: string[];
   summary: string[];
   items: ContrastItem[];
+  conclusion?: string | null;
+  actions?: ContrastAction[];
+  missingInfo?: string[];
+  normNames?: { id: string; name: string }[];
 }

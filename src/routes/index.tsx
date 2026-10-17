@@ -4,10 +4,11 @@ import { useRef, useState } from "react";
 import { ArrowUpRight, Paperclip, X } from "lucide-react";
 import { ConsultProgress } from "@/components/hz/ConsultProgress";
 import { UploadTray } from "@/components/hz/UploadTray";
+import { CaseResult } from "@/components/hz/contrast/CaseResult";
 import { Button } from "@/components/ui/button";
 import { Highlighted, PageHead, Pill } from "@/components/hz/ui";
 import { services, NotImplementedError, type ConsultStage } from "@/services";
-import type { ConsultAnswer, ContrastStatus, EvidenceLevel, Tone } from "@/lib/domain/types";
+import type { ConsultAnswer, EvidenceLevel, Tone } from "@/lib/domain/types";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -188,6 +189,7 @@ function Consultor() {
 }
 
 function AnswerView({ answer }: { answer: ConsultAnswer }) {
+  if (answer.contrast) return <CaseResult answer={answer} />;
   const lvl = levelMeta[answer.level];
   return (
     <article className="rounded-[22px] border border-glass-border bg-card/80 p-6 shadow-soft [overflow-wrap:anywhere] max-sm:p-4">
@@ -201,7 +203,6 @@ function AnswerView({ answer }: { answer: ConsultAnswer }) {
       <p className="mb-1 text-[11px] text-muted-foreground">“{answer.question}”</p>
       <h2 className="mb-3 text-[19px] font-semibold tracking-[-0.4px]">{answer.title}</h2>
 
-      {answer.contrast && <ContrastView contrast={answer.contrast} />}
 
       {answer.facts.length > 0 && (
         <div className="mb-3">
@@ -254,51 +255,5 @@ function AnswerView({ answer }: { answer: ConsultAnswer }) {
         Trazabilidad: consulta → recuperación de fragmentos → evaluación de vigencia → respuesta con evidencia vinculada a la versión documental.
       </div>
     </article>
-  );
-}
-
-const contrastMeta: Record<ContrastStatus, { label: string; tone: Tone }> = {
-  cumple: { label: "Cumple", tone: "green" },
-  riesgo: { label: "Riesgo / brecha", tone: "red" },
-  excepcion: { label: "Requiere excepción", tone: "amber" },
-  sin_evidencia: { label: "Sin evidencia suficiente", tone: "gray" },
-};
-
-function ContrastView({ contrast }: { contrast: NonNullable<ConsultAnswer["contrast"]> }) {
-  return (
-    <div className="mb-5">
-      <div className="mb-3 rounded-xl border border-border bg-secondary px-4 py-3">
-        <div className="eyebrow mb-1.5">{contrast.fileNames.length ? `Caso analizado · ${contrast.fileNames.join(", ")}` : "Resumen"}</div>
-        <ul className="list-disc space-y-1 pl-5 text-[13px] leading-relaxed text-secondary-foreground">
-          {contrast.summary.map((s) => <li key={s}>{s}</li>)}
-        </ul>
-      </div>
-      <div className="eyebrow mb-1.5">Matriz de contraste normativo</div>
-      <div className="space-y-2">
-        {contrast.items.length === 0 && <p className="text-[12px] text-muted-foreground">El análisis no produjo hallazgos.</p>}
-        {contrast.items.map((it, idx) => {
-          const m = contrastMeta[it.status];
-          return (
-            <div key={idx} className="rounded-[15px] border border-border bg-card p-3.5">
-              <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                <Pill tone={m.tone}>{m.label}</Pill>
-                <strong className="text-[12px]">{it.caseFact}</strong>
-              </div>
-              <p className="text-[12px] leading-relaxed text-secondary-foreground">{it.rule}</p>
-              {it.quote && (
-                <blockquote className="mt-2 rounded-r-[10px] border-l-[3px] border-primary bg-quote px-3.5 py-2.5 text-[12px] leading-[1.7] text-secondary-foreground">
-                  “{it.quote}”
-                  <div className="mt-1 text-[10px] text-muted-foreground">{it.documentName}{it.location ? ` · ${it.location}` : ""} · Cita verificada en el texto</div>
-                </blockquote>
-              )}
-              <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-[10px] text-muted-foreground">
-                <span>{it.note}</span>
-                {it.code && <Link to="/biblioteca/$code" params={{ code: it.code }} className="text-foreground underline">Ver normativa</Link>}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
   );
 }
