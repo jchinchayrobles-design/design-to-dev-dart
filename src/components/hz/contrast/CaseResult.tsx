@@ -157,10 +157,10 @@ export function CaseResult({ answer }: { answer: ConsultAnswer }) {
   );
 }
 
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
+function Block({ label, tone, children }: { label: string; tone?: "warn" | "action"; children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-[150px_1fr] gap-3 border-t border-border py-2 text-[12px] leading-relaxed max-sm:grid-cols-1 max-sm:gap-0.5">
-      <div className="font-semibold text-muted-foreground">{label}</div>
+    <div className={cn("rounded-xl px-3 py-2.5 text-[12px] leading-relaxed", tone === "warn" ? "bg-warning-soft" : tone === "action" ? "border border-primary/30 bg-accent" : "bg-secondary")}>
+      <div className="eyebrow mb-1">{label}</div>
       <div className="text-secondary-foreground">{children}</div>
     </div>
   );
@@ -203,8 +203,8 @@ function FindingCard({ id, item, isCase }: { id: string; item: ContrastItem; isC
           )}
           {item.gap && <Block label="Brecha / diferencia" tone="warn">{item.gap}</Block>}
           {item.action && <Block label="Acción requerida" tone="action"><strong className="font-semibold text-foreground">{item.action}</strong></Block>}
-          {item.missing && <Row label="Qué falta para concluir">{item.missing}</Row>}
-          {(legacy || item.status === "sin_evidencia") && item.note && <Row label="Nota">{item.note}</Row>}
+          {item.missing && <Block label="Qué falta para concluir">{item.missing}</Block>}
+          {(legacy || item.status === "sin_evidencia") && item.note && <Block label="Nota">{item.note}</Block>}
         </div>
       )}
     </div>
