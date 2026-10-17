@@ -9,24 +9,44 @@ const TOTAL = 360_000;
 const schema = {
   type: "object",
   additionalProperties: false,
-  required: ["title", "level", "summary", "interpretation", "warnings", "findings"],
+  required: ["title", "level", "conclusion", "summary", "interpretation", "warnings", "actions", "missing_info", "findings"],
   properties: {
     title: { type: "string" },
     level: { type: "string", enum: ["suficiente", "parcial", "insuficiente", "revision"] },
+    conclusion: { type: "string" },
     summary: { type: "array", items: { type: "string" } },
     interpretation: { type: ["string", "null"] },
     warnings: { type: "array", items: { type: "string" } },
+    actions: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["text", "priority", "finding_index"],
+        properties: {
+          text: { type: "string" },
+          priority: { type: "string", enum: ["alta", "media", "baja"] },
+          finding_index: { type: ["integer", "null"] },
+        },
+      },
+    },
+    missing_info: { type: "array", items: { type: "string" } },
     findings: {
       type: "array",
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["case_fact", "status", "rule", "note", "document_id", "quote", "location"],
+        required: ["case_fact", "status", "rule", "note", "observed", "expected", "gap", "action", "missing", "document_id", "quote", "location"],
         properties: {
           case_fact: { type: "string" },
           status: { type: "string", enum: ["cumple", "riesgo", "excepcion", "sin_evidencia"] },
           rule: { type: "string" },
           note: { type: "string" },
+          observed: { type: ["string", "null"] },
+          expected: { type: ["string", "null"] },
+          gap: { type: ["string", "null"] },
+          action: { type: ["string", "null"] },
+          missing: { type: ["string", "null"] },
           document_id: { type: ["string", "null"] },
           quote: { type: ["string", "null"] },
           location: { type: ["string", "null"] },
@@ -39,8 +59,12 @@ const schema = {
 const INSTRUCTIONS = `Eres un analista de cumplimiento normativo. Trabajas SOLO con los documentos proporcionados.
 - Si hay documentos de CASO: extrae los hechos relevantes del caso y contrasta cada uno con las NORMATIVAS.
 - Si no hay caso: responde la pregunta con hallazgos sustentados en las NORMATIVAS (case_fact = punto consultado).
+- Por cada hallazgo completa, en frases breves y concretas: case_fact (título corto del punto), observed (qué dice el caso, con cifras/fechas literales), expected (qué exige la norma), gap (diferencia encontrada o por qué cumple), action (corrección o siguiente paso concreto), missing (documento o dato que falta para concluir, o null), rule (norma/numeral aplicable), note (comentario breve).
 - Cada hallazgo con estado cumple/riesgo/excepcion DEBE incluir document_id de una NORMATIVA y una cita textual literal copiada exactamente del texto (sin parafrasear, 1-3 oraciones). location = página/sección/artículo si aparece en el texto, si no null.
 - Si no hay sustento normativo, usa estado sin_evidencia, document_id y quote null.
+- conclusion: una sola frase con lo que el gestor debe saber. summary: 2-3 puntos.
+- actions: máximo 5 acciones prácticas ordenadas por prioridad, con finding_index (índice 0-based del hallazgo relacionado) o null.
+- missing_info: lista consolidada de documentos o datos a aportar para cerrar el caso.
 - No infieras vigencia de documentos ni inventes datos. Advierte en warnings sobre vacíos, contradicciones o textos truncados.
 - level: suficiente sólo si todos los puntos están sustentados; revision si hay riesgos o excepciones que requieren criterio humano.
 - Escribe en español.`;
