@@ -10,6 +10,6 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
-- UI calls only `src/services` (HorizonteServices); swap the demo provider for server functions without touching components.
-- Demo fixtures live only in `src/lib/demo`; every demo record carries `isDemo` and the UI must label it as test data.
+- UI calls only `src/services` (HorizonteServices); implement real providers behind this contract without coupling components to storage.
+- Until real document storage and analysis are wired, services return empty collections and reject unsupported operations; this prevents invented results and false upload confirmations.
 - Validity/validation rules live in `src/lib/domain` as pure functions with tests, so they can be reused server-side.

@@ -4,9 +4,8 @@ import { BookOpen, CalendarCheck, FileCheck2, FileText, MessageSquareText, type 
 import { AnimatedBeam } from "@/components/ui/animated-beam";
 import { cn } from "@/lib/utils";
 import type { ConsultStage } from "@/services";
-import { Pill } from "./ui";
 
-const baseStages: { id: ConsultStage; label: string; icon: LucideIcon; status: string }[] = [
+const baseStages: [{ id: ConsultStage; label: string; icon: LucideIcon; status: string }, { id: ConsultStage; label: string; icon: LucideIcon; status: string }, { id: ConsultStage; label: string; icon: LucideIcon; status: string }, { id: ConsultStage; label: string; icon: LucideIcon; status: string }] = [
   { id: "consulta", label: "Consulta", icon: MessageSquareText, status: "Interpretando la pregunta…" },
   { id: "recuperacion", label: "Biblioteca documental", icon: BookOpen, status: "Buscando fragmentos en la biblioteca documental…" },
   { id: "vigencia", label: "Evaluación de vigencia", icon: CalendarCheck, status: "Verificando versión aplicable y vigencia…" },
@@ -33,13 +32,13 @@ const Node = forwardRef<HTMLDivElement, { icon: LucideIcon; label: string; state
 );
 Node.displayName = "Node";
 
-export function ConsultProgress({ stage, simulated, caseMode = false }: { stage: ConsultStage; simulated: boolean; caseMode?: boolean }) {
+export function ConsultProgress({ stage, caseMode = false }: { stage: ConsultStage; caseMode?: boolean }) {
   const stages = caseMode
     ? [
-        { ...baseStages[0]!, label: "Caso adjunto", icon: FileText, status: "Extrayendo hechos, montos y fechas del caso…" },
-        baseStages[1]!,
-        { ...baseStages[2]!, status: "Verificando qué versión regía en la fecha del caso…" },
-        { ...baseStages[3]!, label: "Contraste normativo", status: "Contrastando el caso con la normativa…" },
+        { ...baseStages[0], label: "Caso adjunto", icon: FileText, status: "Extrayendo hechos, montos y fechas del caso…" },
+        baseStages[1],
+        { ...baseStages[2], status: "Verificando qué versión regía en la fecha del caso…" },
+        { ...baseStages[3], label: "Contraste normativo", status: "Contrastando el caso con la normativa…" },
       ]
     : baseStages;
   const container = useRef<HTMLDivElement>(null);
@@ -57,12 +56,15 @@ export function ConsultProgress({ stage, simulated, caseMode = false }: { stage:
         {stages.map((s, i) => (
           <Node key={s.id} ref={refs[i]} icon={s.icon} label={s.label} state={i < idx ? "done" : i === idx ? "active" : "idle"} />
         ))}
-        {[0, 1, 2].map((i) => (
+        {refs.slice(0, -1).map((fromRef, i) => {
+          const toRef = refs[i + 1];
+          if (!toRef) return null;
+          return (
           <AnimatedBeam
             key={i}
             containerRef={container}
-            fromRef={refs[i]!}
-            toRef={refs[i + 1]!}
+            fromRef={fromRef}
+            toRef={toRef}
             pathOpacity={i < idx ? 0.9 : 0.6}
             pathColor={i < idx ? "var(--primary)" : "var(--border)"}
             duration={reduce ? 0 : 2.2}
@@ -71,11 +73,11 @@ export function ConsultProgress({ stage, simulated, caseMode = false }: { stage:
             gradientStartColor={reduce ? "transparent" : "var(--primary)"}
             gradientStopColor={reduce ? "transparent" : "var(--muted-foreground)"}
           />
-        ))}
+          );
+        })}
       </div>
       <div className="text-center">
         <div className="text-[13px] font-semibold">{stages[idx]?.status}</div>
-        <div className="mt-2">{simulated && <Pill tone="amber">Simulado · sin procesamiento real</Pill>}</div>
       </div>
     </div>
   );

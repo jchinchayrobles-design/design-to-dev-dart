@@ -8,6 +8,8 @@ import type { Tone } from "@/lib/domain/types";
 export const Route = createFileRoute("/biblioteca/$code")({
   head: ({ params }) => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: `${params.code} · Ficha documental · Horizonte Intelligence` },
       { name: "description", content: `Metadatos, vigencia y versiones del documento ${params.code}.` },
       { property: "og:title", content: `${params.code} · Horizonte Intelligence` },
@@ -49,7 +51,7 @@ function DocDetail() {
   return (
     <section>
       {back}
-      <PageHead eyebrow="Ficha documental" title={d.title} subtitle="Metadatos, vigencia, historial de versiones y relaciones documentales." actions={d.isDemo ? <Pill tone="amber">Datos de prueba</Pill> : undefined} />
+      <PageHead eyebrow="Ficha documental" title={d.title} subtitle="Metadatos, vigencia, historial de versiones y relaciones documentales." />
       <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(280px,1fr)] gap-4 max-lg:grid-cols-1">
         <div>
           <Card title={`${d.code} · ${d.type}`}>
@@ -88,7 +90,7 @@ function DocDetail() {
             <p className="mt-3 text-[10px] text-muted-foreground">Regla: versión aprobada + fecha de vigencia compatible + sin validación pendiente. Jerarquía y derogaciones requieren revisión cuando no están registradas.</p>
           </Card>
           <Card title="Control y trazabilidad">
-            <Info items={[["Código", d.code], ["Versiones registradas", String(d.versions.length)], ["Última actualización", fmtDate(d.uploaded)], ["Fuente de datos", d.isDemo ? "Datos de prueba" : "Biblioteca"]]} />
+            <Info items={[["Código", d.code], ["Versiones registradas", String(d.versions.length)], ["Última actualización", fmtDate(d.uploaded)], ["Fuente de datos", "Biblioteca"]]} />
           </Card>
         </div>
       </div>

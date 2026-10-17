@@ -9,6 +9,8 @@ export const Route = createFileRoute("/biblioteca/")({
   }),
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Biblioteca documental · Horizonte Intelligence" },
       { name: "description", content: "Explora documentos normativos, versiones y estado de vigencia." },
       { property: "og:title", content: "Biblioteca documental · Horizonte Intelligence" },

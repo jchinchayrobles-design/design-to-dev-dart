@@ -2,7 +2,6 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { BookOpen, MessageSquareText, ShieldCheck, Search } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { services } from "@/services";
 
 const nav = [
   { to: "/", label: "Consultor normativo", icon: MessageSquareText },
@@ -43,15 +42,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
-        <div className="mt-auto border-t border-sidebar-border px-2 pt-4 max-md:hidden">
-          <div className="flex items-center gap-2.5">
-            <div className="grid size-9 place-items-center rounded-full bg-secondary text-[12px] font-bold">MC</div>
-            <div>
-              <div className="text-[12px] font-semibold">María Cárdenas</div>
-              <div className="text-[11px] text-muted-foreground">Analista de riesgos · demo</div>
-            </div>
-          </div>
-        </div>
       </aside>
 
       <main className="min-w-0 flex-1">
@@ -61,9 +51,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             <strong className="font-semibold text-foreground">{current}</strong>
           </div>
           <div className="flex items-center gap-3">
-            {services.mode === "demo" && (
-              <span className="hidden rounded-full bg-warning-soft px-3 py-1 text-[10px] font-bold text-warning sm:inline">Datos de prueba</span>
-            )}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
