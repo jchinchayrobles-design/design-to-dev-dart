@@ -10,33 +10,63 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ValidacionesRouteImport } from './routes/validaciones'
+import { Route as BibliotecaIndexRouteImport } from './routes/biblioteca.index'
+import { Route as BibliotecaCodeRouteImport } from './routes/biblioteca.$code'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ValidacionesRoute = ValidacionesRouteImport.update({
+  id: '/validaciones',
+  path: '/validaciones',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BibliotecaIndexRoute = BibliotecaIndexRouteImport.update({
+  id: '/biblioteca/',
+  path: '/biblioteca/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BibliotecaCodeRoute = BibliotecaCodeRouteImport.update({
+  id: '/biblioteca/$code',
+  path: '/biblioteca/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/validaciones': typeof ValidacionesRoute
+  '/biblioteca/$code': typeof BibliotecaCodeRoute
+  '/biblioteca/': typeof BibliotecaIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/validaciones': typeof ValidacionesRoute
+  '/biblioteca/$code': typeof BibliotecaCodeRoute
+  '/biblioteca': typeof BibliotecaIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/validaciones': typeof ValidacionesRoute
+  '/biblioteca/$code': typeof BibliotecaCodeRoute
+  '/biblioteca/': typeof BibliotecaIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/validaciones' | '/biblioteca/$code' | '/biblioteca/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/validaciones' | '/biblioteca/$code' | '/biblioteca'
+  id: '__root__' | '/' | '/validaciones' | '/biblioteca/$code' | '/biblioteca/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ValidacionesRoute: typeof ValidacionesRoute
+  BibliotecaCodeRoute: typeof BibliotecaCodeRoute
+  BibliotecaIndexRoute: typeof BibliotecaIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +78,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/validaciones': {
+      id: '/validaciones'
+      path: '/validaciones'
+      fullPath: '/validaciones'
+      preLoaderRoute: typeof ValidacionesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/biblioteca/': {
+      id: '/biblioteca/'
+      path: '/biblioteca'
+      fullPath: '/biblioteca/'
+      preLoaderRoute: typeof BibliotecaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/biblioteca/$code': {
+      id: '/biblioteca/$code'
+      path: '/biblioteca/$code'
+      fullPath: '/biblioteca/$code'
+      preLoaderRoute: typeof BibliotecaCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ValidacionesRoute: ValidacionesRoute,
+  BibliotecaCodeRoute: BibliotecaCodeRoute,
+  BibliotecaIndexRoute: BibliotecaIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
