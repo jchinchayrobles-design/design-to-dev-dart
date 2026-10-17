@@ -73,6 +73,8 @@ export interface ConsultAnswer {
   evidence: EvidenceFragment[];
   warnings: string[];
   answeredAt: string;
+  /** Present when the user attached a case to contrast against the regulations. */
+  contrast?: CaseContrast;
   /** "demo" answers come from predefined fixtures and are NOT verified. */
   source: "demo" | "backend";
 }
@@ -94,4 +96,22 @@ export interface ValidationFinding {
   severity: "alta" | "media" | "baja";
   reviewStatus: "pendiente" | "en revisión" | "resuelto";
   origin: "regla local" | "demo";
+}
+
+export type ContrastStatus = "cumple" | "riesgo" | "excepcion";
+
+export interface ContrastItem {
+  /** Fact extracted from the user's case. */
+  caseFact: string;
+  status: ContrastStatus;
+  /** Normative reference the fact is contrasted against. */
+  rule: string;
+  code: string;
+  note: string;
+}
+
+export interface CaseContrast {
+  fileNames: string[];
+  summary: string[];
+  items: ContrastItem[];
 }

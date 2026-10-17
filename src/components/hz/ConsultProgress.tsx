@@ -1,12 +1,12 @@
 import { forwardRef, useRef } from "react";
 import { useReducedMotion } from "motion/react";
-import { BookOpen, CalendarCheck, FileCheck2, MessageSquareText, type LucideIcon } from "lucide-react";
+import { BookOpen, CalendarCheck, FileCheck2, FileText, MessageSquareText, type LucideIcon } from "lucide-react";
 import { AnimatedBeam } from "@/components/ui/animated-beam";
 import { cn } from "@/lib/utils";
 import type { ConsultStage } from "@/services";
 import { Pill } from "./ui";
 
-const stages: { id: ConsultStage; label: string; icon: LucideIcon; status: string }[] = [
+const baseStages: { id: ConsultStage; label: string; icon: LucideIcon; status: string }[] = [
   { id: "consulta", label: "Consulta", icon: MessageSquareText, status: "Interpretando la pregunta…" },
   { id: "recuperacion", label: "Biblioteca documental", icon: BookOpen, status: "Buscando fragmentos en la biblioteca documental…" },
   { id: "vigencia", label: "Evaluación de vigencia", icon: CalendarCheck, status: "Verificando versión aplicable y vigencia…" },
@@ -33,7 +33,15 @@ const Node = forwardRef<HTMLDivElement, { icon: LucideIcon; label: string; state
 );
 Node.displayName = "Node";
 
-export function ConsultProgress({ stage, simulated }: { stage: ConsultStage; simulated: boolean }) {
+export function ConsultProgress({ stage, simulated, caseMode = false }: { stage: ConsultStage; simulated: boolean; caseMode?: boolean }) {
+  const stages = caseMode
+    ? [
+        { ...baseStages[0]!, label: "Caso adjunto", icon: FileText, status: "Extrayendo hechos, montos y fechas del caso…" },
+        baseStages[1]!,
+        { ...baseStages[2]!, status: "Verificando qué versión regía en la fecha del caso…" },
+        { ...baseStages[3]!, label: "Contraste normativo", status: "Contrastando el caso con la normativa…" },
+      ]
+    : baseStages;
   const container = useRef<HTMLDivElement>(null);
   const r0 = useRef<HTMLDivElement>(null);
   const r1 = useRef<HTMLDivElement>(null);

@@ -131,3 +131,18 @@ export const demoSuggestions = [
   { label: "Límites de aprobación", prompt: "¿Cuáles son los límites de aprobación para operaciones empresariales?" },
   { label: "¿La circular contradice la política?", prompt: "¿La circular CIR-RC-028 contradice la política vigente?" },
 ];
+
+/** Demo case contrast: fictitious, returned whenever a case file is attached in demo mode. */
+export const demoCaseContrast: Omit<import("@/lib/domain/types").CaseContrast, "fileNames"> & { isDemo: true } = {
+  isDemo: true,
+  summary: [
+    "Solicitud de crédito empresarial por S/ 1 200 000 (dato ficticio).",
+    "Fecha de evaluación del caso: 10 oct 2026.",
+    "Garantía propuesta: fianza solidaria sin tasación actualizada.",
+  ],
+  items: [
+    { caseFact: "Evaluación realizada el 10 oct 2026", status: "cumple", rule: "Aplica la versión vigente a la fecha del caso (v3.0, desde 15 sep 2026).", code: "POL-RC-002", note: "La versión aplicada coincide con la vigente." },
+    { caseFact: "Monto de S/ 1 200 000", status: "excepcion", rule: "Montos superiores al límite de la instancia requieren aprobación del Comité de Créditos.", code: "POL-RC-002", note: "Debe elevarse a comité; no consta aprobación en el expediente." },
+    { caseFact: "Garantía sin tasación actualizada", status: "riesgo", rule: "La circular exige tasación con antigüedad menor a 12 meses.", code: "CIR-RC-028", note: "La circular está pendiente de validación; confirmar con el área responsable." },
+  ],
+};
