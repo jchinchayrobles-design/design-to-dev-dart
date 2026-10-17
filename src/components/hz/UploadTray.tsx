@@ -51,6 +51,7 @@ export function UploadTray({
   const [busy, setBusy] = useState(false);
   const [states, setStates] = useState<Record<string, { status: "cargando" | "guardado" | "error"; error?: string }>>({});
   const [error, setError] = useState("");
+  const [kind, setKind] = useState<"normativa" | "caso">("normativa");
   const key = (f: File) => f.name + f.size;
 
   useEffect(() => { if (open) { setFiles(initialFiles ?? []); setStates({}); setError(""); } }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -74,7 +75,7 @@ export function UploadTray({
       for (const file of pending) {
         setStates((s) => ({ ...s, [key(file)]: { status: "cargando" } }));
         try {
-          await services.uploadDocument(file);
+          await services.uploadDocument(file, kind);
           setStates((s) => ({ ...s, [key(file)]: { status: "guardado" } }));
           onUploaded?.();
           await queryClient.invalidateQueries({ queryKey: ["documents"] });
@@ -95,6 +96,16 @@ export function UploadTray({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         {persist && <DocumentAccess />}
+        {persist && (
+          <div className="flex flex-wrap items-center gap-2 text-[12px]">
+            <span className="text-muted-foreground">Registrar como:</span>
+            {(["normativa", "caso"] as const).map((k) => (
+              <button key={k} type="button" onClick={() => setKind(k)} disabled={busy} className={`rounded-full border px-3 py-1 ${kind === k ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"}`}>
+                {k === "normativa" ? "Normativa" : "Caso"}
+              </button>
+            ))}
+          </div>
+        )}
 
         <Button
           type="button"
@@ -138,7 +149,7 @@ export function UploadTray({
         </div>
 
         {error && <p role="alert" className="text-[12px] text-danger">{error}</p>}
-        <p className="text-[11px] text-muted-foreground">{persist ? "Los documentos se guardan de forma privada. El análisis del contenido y la vigencia aún no están conectados." : "Archivos seleccionados en este navegador; aún no se guardan ni se analizan."}</p>
+        <p className="text-[11px] text-muted-foreground">{persist ? "Los documentos se guardan de forma privada y se lee su texto para poder contrastarlos. La vigencia no se infiere automáticamente." : "Al contrastar, estos archivos se guardan como caso en tu biblioteca privada y se analizan con IA."}</p>
         <DialogFooter>
           <Button variant="outline" className="rounded-full" disabled={busy} onClick={() => close(false)}>{persist && files.length > 0 && pending.length === 0 ? "Cerrar" : "Cancelar"}</Button>
           <Button className="rounded-full" disabled={busy || !files.length || (!onConfirm && !persist) || (persist && !pending.length)} onClick={() => void confirm()}>

@@ -34,6 +34,8 @@ export interface NormativeDocument {
   review: string;
   /** Explicit flag set by a responsible reviewer. */
   pendingValidation?: boolean;
+  kind?: "normativa" | "caso";
+  extractionStatus?: "pendiente" | "extraido" | "no_legible";
 }
 
 export type ValidityState = "Vigente" | "Pendiente" | "Revisión" | "Sin versión";
@@ -92,10 +94,10 @@ export interface ValidationFinding {
   documents: string[];
   severity: "alta" | "media" | "baja";
   reviewStatus: "pendiente" | "en revisión" | "resuelto";
-  origin: "regla local";
+  origin: "regla local" | "contraste IA";
 }
 
-export type ContrastStatus = "cumple" | "riesgo" | "excepcion";
+export type ContrastStatus = "cumple" | "riesgo" | "excepcion" | "sin_evidencia";
 
 export interface ContrastItem {
   /** Fact extracted from the user's case. */
@@ -105,6 +107,10 @@ export interface ContrastItem {
   rule: string;
   code: string;
   note: string;
+  documentName?: string | null;
+  quote?: string | null;
+  location?: string | null;
+  verified?: boolean;
 }
 
 export interface CaseContrast {

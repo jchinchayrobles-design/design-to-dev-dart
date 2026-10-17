@@ -5,4 +5,4 @@
 - [x] Habilitar almacenamiento privado real y acceso para cargar documentos.
 - [x] Conectar bandeja y biblioteca con confirmaciones y errores por archivo.
 - [x] Ejecutar pruebas de guardado y comprobar la bandeja sin confirmaciones falsas.
-- [ ] Verificar carga y lectura persistente con una cuenta real: requiere que el usuario inicie sesión; aún no existen cuentas autorizadas.
+- [ ] Verificar carga y lectura persistente con una cuenta real: requiere que el usuario inicie sesión; aún no existen cuentas autorizadas.- [x] Contraste de casos con normativas usando IA (citas verificadas, historial, validaciones)

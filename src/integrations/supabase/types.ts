@@ -14,30 +14,140 @@ export type Database = {
   }
   public: {
     Tables: {
+      contrast_findings: {
+        Row: {
+          case_fact: string
+          contrast_id: string
+          created_at: string
+          document_id: string | null
+          document_name: string | null
+          id: string
+          location: string | null
+          note: string
+          position: number
+          quote: string | null
+          rule: string
+          status: string
+          user_id: string
+          verified: boolean
+        }
+        Insert: {
+          case_fact: string
+          contrast_id: string
+          created_at?: string
+          document_id?: string | null
+          document_name?: string | null
+          id?: string
+          location?: string | null
+          note?: string
+          position?: number
+          quote?: string | null
+          rule?: string
+          status: string
+          user_id?: string
+          verified?: boolean
+        }
+        Update: {
+          case_fact?: string
+          contrast_id?: string
+          created_at?: string
+          document_id?: string | null
+          document_name?: string | null
+          id?: string
+          location?: string | null
+          note?: string
+          position?: number
+          quote?: string | null
+          rule?: string
+          status?: string
+          user_id?: string
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contrast_findings_contrast_id_fkey"
+            columns: ["contrast_id"]
+            isOneToOne: false
+            referencedRelation: "contrasts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contrasts: {
+        Row: {
+          case_document_ids: string[]
+          created_at: string
+          id: string
+          interpretation: string | null
+          level: string
+          norm_document_ids: string[]
+          question: string
+          summary: Json
+          title: string
+          user_id: string
+          warnings: Json
+        }
+        Insert: {
+          case_document_ids?: string[]
+          created_at?: string
+          id?: string
+          interpretation?: string | null
+          level?: string
+          norm_document_ids?: string[]
+          question: string
+          summary?: Json
+          title?: string
+          user_id?: string
+          warnings?: Json
+        }
+        Update: {
+          case_document_ids?: string[]
+          created_at?: string
+          id?: string
+          interpretation?: string | null
+          level?: string
+          norm_document_ids?: string[]
+          question?: string
+          summary?: Json
+          title?: string
+          user_id?: string
+          warnings?: Json
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           created_at: string
+          extracted_text: string | null
+          extraction_status: string
           file_name: string
           file_size: number
           id: string
+          kind: string
           mime_type: string
           storage_path: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          extracted_text?: string | null
+          extraction_status?: string
           file_name: string
           file_size: number
           id?: string
+          kind?: string
           mime_type?: string
           storage_path: string
           user_id?: string
         }
         Update: {
           created_at?: string
+          extracted_text?: string | null
+          extraction_status?: string
           file_name?: string
           file_size?: number
           id?: string
+          kind?: string
           mime_type?: string
           storage_path?: string
           user_id?: string

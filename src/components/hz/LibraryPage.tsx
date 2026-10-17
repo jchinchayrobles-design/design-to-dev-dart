@@ -1,5 +1,5 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { UploadTray } from "./UploadTray";
@@ -20,6 +20,8 @@ export function LibraryPage() {
   const [area, setArea] = useState("");
   const [status, setStatus] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
+  const qc = useQueryClient();
+  const toggleKind = async (code: string, kind: "normativa" | "caso") => { await services.setDocumentKind(code, kind); await qc.invalidateQueries({ queryKey: ["documents"] }); };
   useEffect(() => setQ(search.q ?? ""), [search.q]);
 
   const types = useMemo(() => [...new Set(docs?.map((d) => d.type))], [docs]);
@@ -87,7 +89,11 @@ export function LibraryPage() {
               {rows.map(({ d, a }) => (
                 <tr key={d.code} onClick={() => navigate({ to: "/biblioteca/$code", params: { code: d.code } })} className="cursor-pointer border-t border-border transition-colors hover:bg-accent">
                   <td className="px-4 py-3"><div className="doc-code">{d.code}</div><div className="font-semibold">{d.title}</div><div className="text-[11px] text-muted-foreground">{d.classification}</div></td>
-                  <td className="px-4 py-3">{d.type}<div className="text-[11px] text-muted-foreground">{d.area}</div></td>
+                  <td className="px-4 py-3">{d.type}
+                    <div className="mt-1 flex items-center gap-1.5">
+                      <button type="button" title="Cambiar entre normativa y caso" onClick={(e) => { e.stopPropagation(); void toggleKind(d.code, d.kind === "caso" ? "normativa" : "caso"); }} className="rounded-full border border-border px-2 py-0.5 text-[10px] hover:bg-secondary">{d.kind === "caso" ? "Caso" : "Normativa"} ⇄</button>
+                      <span className="text-[10px] text-muted-foreground">{d.extractionStatus === "extraido" ? "Texto legible" : d.extractionStatus === "no_legible" ? "No legible" : "Pendiente"}</span>
+                    </div></td>
                   <td className="px-4 py-3">
                     {a.version && !a.uncertain ? <strong>v{a.version.v}</strong> : <span className="text-muted-foreground">{a.version ? `v${a.version.v} · no confirmada` : "No determinada"}</span>}
                     {a.futureVersion && <div className="text-[11px] text-muted-foreground">v{a.futureVersion.v} aprobada · futura</div>}
