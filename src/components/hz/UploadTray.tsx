@@ -51,6 +51,7 @@ export function UploadTray({
   const [busy, setBusy] = useState(false);
   const [states, setStates] = useState<Record<string, { status: "cargando" | "guardado" | "error"; error?: string }>>({});
   const [error, setError] = useState("");
+  const [kind, setKind] = useState<"normativa" | "caso">("normativa");
   const key = (f: File) => f.name + f.size;
 
   useEffect(() => { if (open) { setFiles(initialFiles ?? []); setStates({}); setError(""); } }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -74,7 +75,7 @@ export function UploadTray({
       for (const file of pending) {
         setStates((s) => ({ ...s, [key(file)]: { status: "cargando" } }));
         try {
-          await services.uploadDocument(file);
+          await services.uploadDocument(file, kind);
           setStates((s) => ({ ...s, [key(file)]: { status: "guardado" } }));
           onUploaded?.();
           await queryClient.invalidateQueries({ queryKey: ["documents"] });
@@ -95,6 +96,16 @@ export function UploadTray({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         {persist && <DocumentAccess />}
+        {persist && (
+          <div className="flex flex-wrap items-center gap-2 text-[12px]">
+            <span className="text-muted-foreground">Registrar como:</span>
+            {(["normativa", "caso"] as const).map((k) => (
+              <button key={k} type="button" onClick={() => setKind(k)} disabled={busy} className={`rounded-full border px-3 py-1 ${kind === k ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"}`}>
+                {k === "normativa" ? "Normativa" : "Caso"}
+              </button>
+            ))}
+          </div>
+        )}
 
         <Button
           type="button"
