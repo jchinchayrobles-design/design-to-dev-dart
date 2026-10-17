@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { ArrowUpRight, Loader2 } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { ConsultProgress } from "@/components/hz/ConsultProgress";
 import { Button } from "@/components/ui/button";
 import { Highlighted, PageHead, Pill } from "@/components/hz/ui";
-import { services } from "@/services";
+import { services, type ConsultStage } from "@/services";
 import { demoSuggestions } from "@/lib/demo/fixtures";
 import type { ConsultAnswer, EvidenceLevel, Tone } from "@/lib/domain/types";
 
@@ -29,7 +30,13 @@ const levelMeta: Record<EvidenceLevel, { label: string; tone: Tone }> = {
 
 function Consultor() {
   const [question, setQuestion] = useState("");
-  const ask = useMutation({ mutationFn: (q: string) => services.askQuestion(q) });
+  const [stage, setStage] = useState<ConsultStage>("consulta");
+  const ask = useMutation({
+    mutationFn: (q: string) => {
+      setStage("consulta");
+      return services.askQuestion(q, setStage);
+    },
+  });
 
   const submit = (q: string) => {
     const t = q.trim();
@@ -48,11 +55,7 @@ function Consultor() {
       />
 
       {ask.isPending ? (
-        <div className="glass-panel flex min-h-[330px] flex-col items-center justify-center gap-3 rounded-[22px] text-center">
-          <Loader2 className="size-6 animate-spin" />
-          <div className="text-[13px] font-semibold">Buscando evidencia documental…</div>
-          <div className="text-[11px] text-muted-foreground">Recuperación de fragmentos → evaluación de vigencia → respuesta</div>
-        </div>
+        <ConsultProgress stage={stage} simulated={services.mode === "demo"} />
       ) : ask.isError ? (
         <div className="glass-panel rounded-[22px] p-8 text-center">
           <Pill tone="red">Error de conexión</Pill>
