@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import { AppShell } from "@/components/hz/AppShell";
 import { Toaster } from "@/components/ui/sonner";
+import { services } from "@/services";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -118,6 +119,11 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => services.onIdentityChange(() => {
+    queryClient.removeQueries({ queryKey: ["documents"] });
+    queryClient.removeQueries({ queryKey: ["document"] });
+    void queryClient.invalidateQueries({ queryKey: ["identity"] });
+  }), [queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>

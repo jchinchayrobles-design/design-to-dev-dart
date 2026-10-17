@@ -11,5 +11,7 @@
 
 ## Architecture rules
 - UI calls only `src/services` (HorizonteServices); implement real providers behind this contract without coupling components to storage.
-- Until real document storage and analysis are wired, services return empty collections and reject unsupported operations; this prevents invented results and false upload confirmations.
+- Document files and metadata are private and owner-scoped through Lovable Cloud RLS; the browser provider handles storage only inside service methods so UI remains decoupled and SSR never reads private data.
+- Unsupported analysis operations reject without results; stored documents have no inferred normative metadata or validity, preventing invented conclusions.
+- Any file extension can be stored; upload confirmation requires both storage and metadata success, with cleanup on registration failure to avoid false confirmations.
 - Validity/validation rules live in `src/lib/domain` as pure functions with tests, so they can be reused server-side.
