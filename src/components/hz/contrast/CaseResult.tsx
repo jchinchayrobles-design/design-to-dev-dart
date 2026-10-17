@@ -178,25 +178,31 @@ function FindingCard({ id, item, isCase }: { id: string; item: ContrastItem; isC
         <ChevronDown className={cn("size-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} />
       </button>
       {open && (
-        <div className="px-4 pb-4">
-          {item.observed && <Row label={isCase ? "Qué dice el caso" : "Punto consultado"}>{item.observed}</Row>}
-          {(item.expected || item.rule) && (
-            <Row label="Qué exige la norma">
-              {item.expected ?? item.rule}
-              {item.expected && item.rule && <div className="mt-0.5 text-[11px] text-muted-foreground">{item.rule}</div>}
-              {item.quote && (
-                <blockquote className="mt-2 rounded-r-[10px] border-l-[3px] border-primary bg-quote px-3 py-2 text-[12px] leading-[1.7]">
-                  “{item.quote}”
-                  <div className="mt-1 flex flex-wrap items-center justify-between gap-2 text-[10px] text-muted-foreground">
-                    <span>{item.documentName}{item.location ? ` · ${item.location}` : ""} · Cita verificada en el texto</span>
-                    {item.code && <Link to="/biblioteca/$code" params={{ code: item.code }} className="text-foreground underline">Ver normativa</Link>}
-                  </div>
-                </blockquote>
+        <div className="space-y-2.5 border-t border-border px-4 pb-4 pt-3">
+          {(item.observed || item.expected || item.rule) && (
+            <div className="grid gap-2.5 md:grid-cols-2">
+              {item.observed && (
+                <Block label={isCase ? "Lo que dice el caso" : "Punto consultado"}>{item.observed}</Block>
               )}
-            </Row>
+              {(item.expected || item.rule) && (
+                <Block label="Lo que exige la norma">
+                  {item.expected ?? item.rule}
+                  {item.expected && item.rule && <div className="mt-0.5 text-[11px] text-muted-foreground">{item.rule}</div>}
+                </Block>
+              )}
+            </div>
           )}
-          {item.gap && <Row label="Diferencia encontrada">{item.gap}</Row>}
-          {item.action && <Row label="Qué hacer"><strong className="font-semibold text-foreground">{item.action}</strong></Row>}
+          {item.quote && (
+            <blockquote className="rounded-r-[10px] border-l-[3px] border-primary bg-quote px-3 py-2 text-[12px] leading-[1.7]">
+              “{item.quote}”
+              <div className="mt-1 flex flex-wrap items-center justify-between gap-2 text-[10px] text-muted-foreground">
+                <span>{item.documentName}{item.location ? ` · ${item.location}` : ""} · Cita verificada en el texto</span>
+                {item.code && <Link to="/biblioteca/$code" params={{ code: item.code }} className="text-foreground underline">Ver normativa</Link>}
+              </div>
+            </blockquote>
+          )}
+          {item.gap && <Block label="Brecha / diferencia" tone="warn">{item.gap}</Block>}
+          {item.action && <Block label="Acción requerida" tone="action"><strong className="font-semibold text-foreground">{item.action}</strong></Block>}
           {item.missing && <Row label="Qué falta para concluir">{item.missing}</Row>}
           {(legacy || item.status === "sin_evidencia") && item.note && <Row label="Nota">{item.note}</Row>}
         </div>
