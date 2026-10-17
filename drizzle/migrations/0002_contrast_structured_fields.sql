@@ -1,0 +1,2 @@
+ALTER TABLE public.contrasts ADD COLUMN IF NOT EXISTS conclusion text, ADD COLUMN IF NOT EXISTS actions jsonb, ADD COLUMN IF NOT EXISTS missing_info jsonb;
+ALTER TABLE public.contrast_findings ADD COLUMN IF NOT EXISTS observed text, ADD COLUMN IF NOT EXISTS expected text, ADD COLUMN IF NOT EXISTS gap text, ADD COLUMN IF NOT EXISTS action text, ADD COLUMN IF NOT EXISTS missing text;
