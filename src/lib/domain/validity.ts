@@ -146,7 +146,7 @@ export function runLocalChecks(docs: NormativeDocument[], date: string): Validat
           title: "Posible contradicción normativa",
           description: `${d.code} y ${r.target}: ${r.note}`,
           reason: "Relación de conflicto registrada sin resolución de precedencia.",
-          documents: [d.code, r.target.split(" ")[0]],
+          documents: [d.code, r.target.split(" ")[0] ?? r.target],
           severity: "alta",
           reviewStatus: "pendiente",
           origin: "regla local",

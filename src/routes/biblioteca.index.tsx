@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LibraryPage } from "@/components/hz/LibraryPage";
 
-type Search = { q?: string };
+type Search = { q?: string | undefined };
 
 export const Route = createFileRoute("/biblioteca/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
-    q: typeof s.q === "string" && s.q ? s.q : undefined,
+    q: typeof s["q"] === "string" && s["q"] ? s["q"] : undefined,
   }),
   head: () => ({
     meta: [
