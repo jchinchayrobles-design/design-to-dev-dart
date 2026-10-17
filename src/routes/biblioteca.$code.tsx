@@ -4,6 +4,9 @@ import { Empty, PageHead, Panel, Pill } from "@/components/hz/ui";
 import { services } from "@/services";
 import { assessValidity, fmtDate } from "@/lib/domain/validity";
 import type { Tone } from "@/lib/domain/types";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/biblioteca/$code")({
   head: ({ params }) => ({
@@ -42,6 +45,7 @@ function DocDetail() {
   const { code } = Route.useParams();
   const date = services.referenceDate();
   const { data: d, isLoading } = useQuery({ queryKey: ["document", code], queryFn: () => services.getDocument(code) });
+  const download = useMutation({ mutationFn: () => services.downloadDocument(code) });
 
   const back = <Link to="/biblioteca" className="mb-4 inline-block text-[12px] text-muted-foreground hover:text-foreground">← Volver a biblioteca</Link>;
   if (isLoading) return <>{back}<Empty>Cargando ficha…</Empty></>;
@@ -51,7 +55,8 @@ function DocDetail() {
   return (
     <section>
       {back}
-      <PageHead eyebrow="Ficha documental" title={d.title} subtitle="Metadatos, vigencia, historial de versiones y relaciones documentales." />
+      <PageHead eyebrow="Ficha documental" title={d.title} subtitle="Metadatos, vigencia, historial de versiones y relaciones documentales." actions={<Button disabled={download.isPending} onClick={() => download.mutate()}><Download />{download.isPending ? "Descargando…" : "Descargar archivo"}</Button>} />
+      {download.isError && <p role="alert" className="mb-3 text-[12px] text-danger">{download.error.message}</p>}
       <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(280px,1fr)] gap-4 max-lg:grid-cols-1">
         <div>
           <Card title={`${d.code} · ${d.type}`}>

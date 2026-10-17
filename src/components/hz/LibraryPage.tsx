@@ -6,6 +6,7 @@ import { UploadTray } from "./UploadTray";
 import { Empty, PageHead, Panel, Pill } from "./ui";
 import { services } from "@/services";
 import { assessValidity, fmtDate } from "@/lib/domain/validity";
+import { DocumentAccess } from "./DocumentAccess";
 
 const field = "rounded-[9px] border border-input bg-card px-3 py-2.5 text-[12px] outline-none focus:border-ring";
 
@@ -50,6 +51,7 @@ export function LibraryPage() {
           </>
         }
       />
+      <DocumentAccess />
       <div className="mb-4 flex flex-wrap gap-2.5 text-[11px] text-muted-foreground">
         <span>{docs?.length ?? "—"} documentos registrados</span>
         <span>Fecha de referencia: {fmtDate(date)}</span>
@@ -81,7 +83,7 @@ export function LibraryPage() {
             <tbody>
               {isLoading && <tr><td colSpan={6}><Empty>Cargando documentos…</Empty></td></tr>}
               {isError && <tr><td colSpan={6}><Empty>No se pudo cargar la biblioteca. <button className="underline" onClick={() => refetch()}>Reintentar</button></Empty></td></tr>}
-              {docs && rows.length === 0 && <tr><td colSpan={6}><Empty>{docs.length === 0 ? "No hay documentos normativos registrados. El guardado de archivos aún no está conectado." : "No hay documentos que coincidan con los filtros."}</Empty></td></tr>}
+              {docs && rows.length === 0 && <tr><td colSpan={6}><Empty>{docs.length === 0 ? "No hay documentos registrados en tu biblioteca." : "No hay documentos que coincidan con los filtros."}</Empty></td></tr>}
               {rows.map(({ d, a }) => (
                 <tr key={d.code} onClick={() => navigate({ to: "/biblioteca/$code", params: { code: d.code } })} className="cursor-pointer border-t border-border transition-colors hover:bg-accent">
                   <td className="px-4 py-3"><div className="doc-code">{d.code}</div><div className="font-semibold">{d.title}</div><div className="text-[11px] text-muted-foreground">{d.classification}</div></td>
@@ -101,7 +103,7 @@ export function LibraryPage() {
         {docs && <div className="border-t border-border px-4 py-3 text-[11px] text-muted-foreground">Mostrando {rows.length} de {docs.length} documentos</div>}
       </Panel>
 
-      <UploadTray open={uploadOpen} onOpenChange={setUploadOpen} />
+      <UploadTray open={uploadOpen} onOpenChange={setUploadOpen} persist />
     </section>
   );
 }
