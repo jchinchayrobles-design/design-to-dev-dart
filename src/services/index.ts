@@ -59,13 +59,19 @@ async function currentUser() {
 type ContrastRow = Database["public"]["Tables"]["contrasts"]["Row"];
 type FindingRow = Database["public"]["Tables"]["contrast_findings"]["Row"];
 async function toAnswer(c: ContrastRow, findings: FindingRow[]): Promise<ConsultAnswer> {
-  const ids = [...c.case_document_ids];
-  const { data: caseDocs } = ids.length ? await supabase.from("documents").select("id, file_name").in("id", ids) : { data: [] };
+  const ids = [...c.case_document_ids, ...(c.norm_document_ids ?? [])];
+  const { data: allDocs } = ids.length ? await supabase.from("documents").select("id, file_name").in("id", ids) : { data: [] };
+  const caseDocs = (allDocs ?? []).filter((d) => c.case_document_ids.includes(d.id));
+  const normNames = (allDocs ?? []).filter((d) => (c.norm_document_ids ?? []).includes(d.id)).map((d) => ({ id: d.id, name: d.file_name }));
   const items: ContrastItem[] = findings.sort((a, b) => a.position - b.position).map((f) => ({
     caseFact: f.case_fact, status: f.status as ContrastItem["status"], rule: f.rule, note: f.note,
     code: f.document_id ?? "", documentName: f.document_name, quote: f.quote, location: f.location, verified: f.verified,
+    observed: f.observed, expected: f.expected, gap: f.gap, action: f.action, missing: f.missing,
   }));
-  const contrast: CaseContrast = { fileNames: (caseDocs ?? []).map((d) => d.file_name), summary: (c.summary as string[]) ?? [], items };
+  const contrast: CaseContrast = { fileNames: (caseDocs ?? []).map((d) => d.file_name), summary: (c.summary as string[]) ?? [], items,
+    conclusion: c.conclusion, missingInfo: (c.missing_info as string[] | null) ?? [], normNames,
+    actions: ((c.actions as { text: string; priority: "alta" | "media" | "baja"; finding_index: number | null }[] | null) ?? []).map((a) => ({ text: a.text, priority: a.priority, findingIndex: a.finding_index })),
+  };
   return {
     id: c.id, question: c.question, title: c.title, level: c.level as EvidenceLevel,
     facts: [], interpretation: c.interpretation, evidence: [], warnings: (c.warnings as string[]) ?? [],
