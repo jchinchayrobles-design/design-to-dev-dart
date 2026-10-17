@@ -1,28 +1,35 @@
 import { describe, expect, it } from "vitest";
 import { assessValidity } from "./validity";
-import { demoDocuments } from "@/lib/demo/fixtures";
+import type { DocumentVersion, NormativeDocument } from "./types";
 
-const doc = (c: string) => demoDocuments.find((d) => d.code === c)!;
+// Minimal test inputs, never imported by the application.
+const version = (v: string, status: DocumentVersion["status"], from: string | null): DocumentVersion => ({
+  v, status, from, until: null, approved: null, by: null, note: "",
+});
+const doc = (versions: DocumentVersion[]): NormativeDocument => ({
+  id: "test", code: "test", title: "", type: "", area: "", owner: "", description: "",
+  versions, relations: [], classification: "", uploaded: null, review: "",
+});
 const DATE = "2026-10-17";
 
 describe("assessValidity", () => {
-  it("picks v3.0 of POL-RC-002, not replaced v2.0", () => {
-    const a = assessValidity(doc("POL-RC-002"), DATE);
+  it("picks the approved version, not a replaced version", () => {
+    const a = assessValidity(doc([version("2.0", "replaced", "2025-01-01"), version("3.0", "approved", "2026-09-15")]), DATE);
     expect(a.state).toBe("Vigente");
     expect(a.version?.v).toBe("3.0");
   });
-  it("keeps v2.0 of PR-OP-014 applicable while v3.0 is future", () => {
-    const a = assessValidity(doc("PR-OP-014"), DATE);
+  it("keeps the current version applicable while a later one is future", () => {
+    const a = assessValidity(doc([version("2.0", "approved", "2025-01-01"), version("3.0", "approved", "2026-12-01")]), DATE);
     expect(a.version?.v).toBe("2.0");
     expect(a.futureVersion?.v).toBe("3.0");
   });
   it("never concludes vigencia for a pending document", () => {
-    const a = assessValidity(doc("CIR-RC-028"), DATE);
+    const a = assessValidity(doc([version("1.0", "pending", "2026-01-01")]), DATE);
     expect(a.state).toBe("Pendiente");
     expect(a.version).toBeNull();
   });
   it("flags approved version without dates as uncertain", () => {
-    const a = assessValidity(doc("POL-RC-009"), DATE);
+    const a = assessValidity(doc([version("1.0", "approved", null)]), DATE);
     expect(a.state).toBe("Revisión");
     expect(a.uncertain).toBe(true);
   });
