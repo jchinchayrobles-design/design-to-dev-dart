@@ -32,7 +32,7 @@ function Validaciones() {
     <section>
       <PageHead eyebrow="Gobierno documental" title="Centro de validaciones" subtitle="Revisiones que requieren decisión de un responsable autorizado." actions={<button onClick={() => refetch()} className="rounded-full border border-border bg-card px-4 py-2.5 text-[12px] hover:bg-accent">{isFetching ? "Revisando…" : "↻ Volver a revisar"}</button>} />
       <Notice title="La validación requiere criterio humano">
-        No hay documentos disponibles para validar. La revisión de vigencia y contradicciones requiere documentos reales y procesamiento documental conectado.
+        Estos son los hallazgos de riesgo, excepción o sin evidencia generados por tus contrastes con IA. Un responsable debe revisarlos antes de tomar decisiones.
       </Notice>
       <Panel className="overflow-hidden">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
@@ -47,7 +47,7 @@ function Validaciones() {
             <tbody>
               {isLoading && <tr><td colSpan={5}><Empty>Ejecutando reglas…</Empty></td></tr>}
               {isError && <tr><td colSpan={5}><Empty>No se pudieron ejecutar las validaciones.</Empty></td></tr>}
-              {data?.length === 0 && <tr><td colSpan={5}><Empty>Sin validaciones disponibles: aún no hay documentos para revisar.</Empty></td></tr>}
+              {data?.length === 0 && <tr><td colSpan={5}><Empty>Sin hallazgos pendientes. Realiza un contraste en el Consultor para generar revisiones.</Empty></td></tr>}
               {data?.map((f) => (
                 <tr key={f.id} className="border-t border-border align-top">
                   <td className="px-4 py-3"><div className="text-[10px] font-bold uppercase text-muted-foreground">{kindLabel[f.kind]}</div><div className="font-semibold">{f.title}</div><div className="mt-0.5 max-w-[360px] text-[11px] text-muted-foreground">{f.description}</div></td>

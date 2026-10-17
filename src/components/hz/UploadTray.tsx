@@ -149,7 +149,7 @@ export function UploadTray({
         </div>
 
         {error && <p role="alert" className="text-[12px] text-danger">{error}</p>}
-        <p className="text-[11px] text-muted-foreground">{persist ? "Los documentos se guardan de forma privada. El análisis del contenido y la vigencia aún no están conectados." : "Archivos seleccionados en este navegador; aún no se guardan ni se analizan."}</p>
+        <p className="text-[11px] text-muted-foreground">{persist ? "Los documentos se guardan de forma privada y se lee su texto para poder contrastarlos. La vigencia no se infiere automáticamente." : "Al contrastar, estos archivos se guardan como caso en tu biblioteca privada y se analizan con IA."}</p>
         <DialogFooter>
           <Button variant="outline" className="rounded-full" disabled={busy} onClick={() => close(false)}>{persist && files.length > 0 && pending.length === 0 ? "Cerrar" : "Cancelar"}</Button>
           <Button className="rounded-full" disabled={busy || !files.length || (!onConfirm && !persist) || (persist && !pending.length)} onClick={() => void confirm()}>
