@@ -1,9 +1,8 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { UploadTray } from "./UploadTray";
 import { Empty, PageHead, Panel, Pill } from "./ui";
 import { services } from "@/services";
 import { assessValidity, fmtDate } from "@/lib/domain/validity";
@@ -105,21 +104,7 @@ export function LibraryPage() {
         {docs && <div className="border-t border-border px-4 py-3 text-[11px] text-muted-foreground">Mostrando {rows.length} de {docs.length} documentos</div>}
       </Panel>
 
-      <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
-        <DialogContent className="rounded-2xl">
-          <DialogHeader>
-            <DialogTitle>Registrar documento</DialogTitle>
-            <DialogDescription>
-              La carga y el procesamiento documental aún no están conectados. Se habilitarán cuando se definan el almacenamiento, los metadatos obligatorios y los permisos.
-            </DialogDescription>
-          </DialogHeader>
-          <p className="text-[12px] font-semibold">En esta versión no se guardará ningún archivo.</p>
-          <DialogFooter>
-            <Button variant="outline" className="rounded-full" onClick={() => setUploadOpen(false)}>Cerrar</Button>
-            <Button className="rounded-full" onClick={() => { setUploadOpen(false); toast("Función pendiente de backend"); }}>Entendido</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <UploadTray open={uploadOpen} onOpenChange={setUploadOpen} />
     </section>
   );
 }
