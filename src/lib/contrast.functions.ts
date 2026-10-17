@@ -160,8 +160,10 @@ export const runContrast = createServerFn({ method: "POST" })
     if (failed || !text) throw new Error("El análisis no se completó. Inténtalo nuevamente.");
 
     let out: {
-      title: string; level: "suficiente" | "parcial" | "insuficiente" | "revision"; summary: string[]; interpretation: string | null; warnings: string[];
-      findings: { case_fact: string; status: FindingStatus; rule: string; note: string; document_id: string | null; quote: string | null; location: string | null }[];
+      title: string; level: "suficiente" | "parcial" | "insuficiente" | "revision"; conclusion: string; summary: string[]; interpretation: string | null; warnings: string[];
+      actions: { text: string; priority: "alta" | "media" | "baja"; finding_index: number | null }[];
+      missing_info: string[];
+      findings: { case_fact: string; status: FindingStatus; rule: string; note: string; observed: string | null; expected: string | null; gap: string | null; action: string | null; missing: string | null; document_id: string | null; quote: string | null; location: string | null }[];
     };
     try { out = JSON.parse(text); } catch { throw new Error("La respuesta del análisis no tuvo un formato válido."); }
 
@@ -177,6 +179,11 @@ export const runContrast = createServerFn({ method: "POST" })
         status: resolveFindingStatus(f.status, verified),
         rule: f.rule,
         note: verified ? f.note : f.status !== "sin_evidencia" ? `Cita no verificada: la cita propuesta no se encontró literalmente en la normativa. ${f.note}` : f.note,
+        observed: f.observed,
+        expected: verified ? f.expected : null,
+        gap: verified ? f.gap : null,
+        action: f.action,
+        missing: f.missing,
         document_id: doc?.id ?? null,
         document_name: doc?.file_name ?? null,
         quote: verified ? f.quote : null,
@@ -186,12 +193,17 @@ export const runContrast = createServerFn({ method: "POST" })
     });
     if (unverified) warnings.push(`${unverified} hallazgo(s) se marcaron "sin evidencia" porque su cita no se encontró en el texto de la normativa.`);
     const level = unverified && out.level === "suficiente" ? "parcial" : out.level;
+    const actions = (out.actions ?? []).slice(0, 5).map((a) => ({
+      text: a.text, priority: a.priority,
+      finding_index: Number.isInteger(a.finding_index) && a.finding_index! >= 0 && a.finding_index! < findings.length ? a.finding_index : null,
+    }));
 
     const { data: saved, error: insErr } = await supabase
       .from("contrasts")
       .insert({
         user_id: userId, question: data.question, case_document_ids: cases.map((c) => c.id), norm_document_ids: norms.map((n) => n.id),
         title: out.title, level, summary: out.summary, interpretation: out.interpretation, warnings: [...warnings, ...out.warnings],
+        conclusion: out.conclusion, actions, missing_info: out.missing_info ?? [],
       })
       .select("id")
       .single();
