@@ -12,6 +12,7 @@ import { runLocalChecks } from "@/lib/domain/validity";
 import {
   DEMO_REFERENCE_DATE,
   demoAnswers,
+  demoCaseContrast,
   demoDocuments,
   insufficientAnswer,
 } from "@/lib/demo/fixtures";
@@ -29,7 +30,7 @@ export interface HorizonteServices {
   referenceDate: () => string;
   listDocuments: () => Promise<NormativeDocument[]>;
   getDocument: (code: string) => Promise<NormativeDocument | null>;
-  askQuestion: (question: string, onStage?: (stage: ConsultStage) => void) => Promise<ConsultAnswer>;
+  askQuestion: (question: string, onStage?: (stage: ConsultStage) => void, caseFiles?: File[]) => Promise<ConsultAnswer>;
   runValidations: () => Promise<ValidationFinding[]>;
   getProcessingStatus: (code: string) => Promise<ProcessingStatus>;
   uploadDocument: (file: File) => Promise<never>;
@@ -50,7 +51,7 @@ const demoProvider: HorizonteServices = {
     await delay(100);
     return demoDocuments.find((d) => d.code === code) ?? null;
   },
-  async askQuestion(question, onStage) {
+  async askQuestion(question, onStage, caseFiles = []) {
     // Simulated timings: the demo has no real pipeline behind these stages.
     for (const [stage, ms] of [["consulta", 500], ["recuperacion", 1100], ["vigencia", 900], ["respuesta", 600]] as const) {
       onStage?.(stage);
@@ -65,6 +66,14 @@ const demoProvider: HorizonteServices = {
       question,
       answeredAt: new Date().toISOString(),
       source: "demo",
+      ...(caseFiles.length
+        ? {
+            title: "Contraste del caso con la normativa vigente",
+            level: "revision" as const,
+            contrast: { fileNames: caseFiles.map((f) => f.name), summary: demoCaseContrast.summary, items: demoCaseContrast.items },
+            warnings: ["Contraste simulado: el contenido del archivo no fue leído. Los hechos del caso son de ejemplo.", ...rest.warnings],
+          }
+        : {}),
     };
   },
   async runValidations() {
