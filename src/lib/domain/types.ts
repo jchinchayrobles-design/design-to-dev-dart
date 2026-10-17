@@ -32,10 +32,8 @@ export interface NormativeDocument {
   classification: string;
   uploaded: string | null;
   review: string;
-  /** Explicit flag set by a responsible reviewer (demo: CIR-RC-028). */
+  /** Explicit flag set by a responsible reviewer. */
   pendingValidation?: boolean;
-  /** True when the document is demo/test data, never real institutional data. */
-  isDemo: boolean;
 }
 
 export type ValidityState = "Vigente" | "Pendiente" | "Revisión" | "Sin versión";
@@ -75,8 +73,7 @@ export interface ConsultAnswer {
   answeredAt: string;
   /** Present when the user attached a case to contrast against the regulations. */
   contrast?: CaseContrast;
-  /** "demo" answers come from predefined fixtures and are NOT verified. */
-  source: "demo" | "backend";
+  source: "backend";
 }
 
 export type FindingKind =
@@ -95,7 +92,7 @@ export interface ValidationFinding {
   documents: string[];
   severity: "alta" | "media" | "baja";
   reviewStatus: "pendiente" | "en revisión" | "resuelto";
-  origin: "regla local" | "demo";
+  origin: "regla local";
 }
 
 export type ContrastStatus = "cumple" | "riesgo" | "excepcion";

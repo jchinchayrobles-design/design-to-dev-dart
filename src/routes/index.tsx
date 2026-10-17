@@ -6,13 +6,14 @@ import { ConsultProgress } from "@/components/hz/ConsultProgress";
 import { UploadTray } from "@/components/hz/UploadTray";
 import { Button } from "@/components/ui/button";
 import { Highlighted, PageHead, Pill } from "@/components/hz/ui";
-import { services, type ConsultStage } from "@/services";
-import { demoSuggestions } from "@/lib/demo/fixtures";
+import { services, NotImplementedError, type ConsultStage } from "@/services";
 import type { ConsultAnswer, ContrastStatus, EvidenceLevel, Tone } from "@/lib/domain/types";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Consultor normativo · Horizonte Intelligence" },
       { name: "description", content: "Pregunta en lenguaje natural y revisa la evidencia documental que sustenta cada respuesta." },
       { property: "og:title", content: "Consultor normativo · Horizonte Intelligence" },
@@ -62,15 +63,14 @@ function Consultor() {
         eyebrow="Horizonte Intelligence / Consulta"
         title="Consultor normativo"
         subtitle="Pregunta en lenguaje natural. Revisa la respuesta y abre la evidencia exacta que la sustenta."
-        actions={services.mode === "demo" ? <Pill>Entorno simulado</Pill> : undefined}
       />
 
       {ask.isPending ? (
-        <ConsultProgress stage={stage} simulated={services.mode === "demo"} caseMode={(ask.variables?.files.length ?? 0) > 0} />
+        <ConsultProgress stage={stage} caseMode={(ask.variables?.files.length ?? 0) > 0} />
       ) : ask.isError ? (
         <div className="glass-panel rounded-[22px] p-8 text-center">
-          <Pill tone="red">Error de conexión</Pill>
-          <p className="mt-3 text-[13px] text-muted-foreground">No se pudo completar la consulta. No se ha emitido ninguna conclusión.</p>
+          <Pill tone="amber">{ask.error instanceof NotImplementedError ? "Consulta no disponible" : "Error de conexión"}</Pill>
+          <p className="mt-3 text-[13px] text-muted-foreground">{ask.error instanceof NotImplementedError ? ask.error.message : "No se pudo completar la consulta. No se ha emitido ninguna conclusión."}</p>
           <Button className="mt-4 rounded-full" onClick={() => submit(question)}>Reintentar</Button>
         </div>
       ) : ask.data ? (
@@ -80,19 +80,9 @@ function Consultor() {
           <div className="mx-auto mb-4 grid size-12 place-items-center rounded-full bg-primary text-2xl text-primary-foreground">✳</div>
           <h2 className="text-[27px] font-semibold tracking-[-0.7px]">¿Qué necesitas resolver?</h2>
           <p className="mx-auto mb-6 mt-2 max-w-[600px] text-[14px] leading-relaxed text-muted-foreground">
-            Te mostraré una respuesta breve, los fragmentos relevantes y la fuente exacta. Si la evidencia no basta, te lo diré.
+            Todavía no hay documentos disponibles para sustentar una consulta.
           </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {demoSuggestions.map((s) => (
-              <button
-                key={s.label}
-                onClick={() => submit(s.prompt)}
-                className="rounded-3xl border border-border bg-card px-3.5 py-2 text-[11px] text-secondary-foreground transition-colors hover:border-ring hover:bg-accent"
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
+          <Pill>Sin documentos normativos registrados</Pill>
         </div>
       )}
 
@@ -149,7 +139,7 @@ function Consultor() {
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3 text-[10px] text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <span className="size-1.5 rounded-full bg-warning" />
-            {services.mode === "demo" ? "Respuestas predefinidas de demostración · no verificadas" : "Conectado a la biblioteca documental"}
+            {services.mode === "backend" ? "Biblioteca documental" : "Análisis documental pendiente de conexión"}
           </span>
           <div className="flex items-center gap-2">
             <Button type="button" variant="outline" className="rounded-full" onClick={() => setTrayOpen(true)} disabled={ask.isPending}>
@@ -162,7 +152,7 @@ function Consultor() {
         </div>
       </form>
       <p className="mx-1 mt-3 text-center text-[10px] leading-normal text-muted-foreground">
-        Las respuestas de esta versión son simuladas y sus fragmentos son ficticios. En producción, la búsqueda, el análisis documental y la recuperación de fragmentos se ejecutarán en el servidor.
+        Los archivos seleccionados permanecen en la bandeja; aún no se guardan ni se analizan.
       </p>
     </section>
   );
@@ -175,14 +165,14 @@ function AnswerView({ answer }: { answer: ConsultAnswer }) {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <Pill tone={lvl.tone}>{lvl.label}</Pill>
         <span className="text-[10px] text-muted-foreground">
-          {answer.source === "demo" ? "Respuesta simulada · no verificada" : "Respuesta del motor"} ·{" "}
+          Respuesta con evidencia ·{" "}
           {new Date(answer.answeredAt).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" })}
         </span>
       </div>
       <p className="mb-1 text-[11px] text-muted-foreground">“{answer.question}”</p>
       <h2 className="mb-3 text-[19px] font-semibold tracking-[-0.4px]">{answer.title}</h2>
 
-      {answer.contrast && <ContrastView contrast={answer.contrast} demo={answer.source === "demo"} />}
+      {answer.contrast && <ContrastView contrast={answer.contrast} />}
 
       {answer.facts.length > 0 && (
         <div className="mb-3">
@@ -211,7 +201,6 @@ function AnswerView({ answer }: { answer: ConsultAnswer }) {
                 <span className="doc-code">{e.code}</span>
                 <strong className="text-[12px]">{e.title}</strong>
                 <Pill>{e.version}</Pill>
-                {answer.source === "demo" && <Pill tone="amber">Fragmento ficticio</Pill>}
               </div>
               <blockquote className="rounded-r-[10px] border-l-[3px] border-primary bg-quote px-3.5 py-3 text-[12px] leading-[1.75] text-secondary-foreground">
                 <Highlighted text={e.quote} />
@@ -245,7 +234,7 @@ const contrastMeta: Record<ContrastStatus, { label: string; tone: Tone }> = {
   excepcion: { label: "Requiere excepción", tone: "amber" },
 };
 
-function ContrastView({ contrast, demo }: { contrast: NonNullable<ConsultAnswer["contrast"]>; demo: boolean }) {
+function ContrastView({ contrast }: { contrast: NonNullable<ConsultAnswer["contrast"]> }) {
   return (
     <div className="mb-5">
       <div className="mb-3 rounded-xl border border-border bg-secondary px-4 py-3">
@@ -253,7 +242,6 @@ function ContrastView({ contrast, demo }: { contrast: NonNullable<ConsultAnswer[
         <ul className="list-disc space-y-1 pl-5 text-[13px] leading-relaxed text-secondary-foreground">
           {contrast.summary.map((s) => <li key={s}>{s}</li>)}
         </ul>
-        {demo && <div className="mt-2"><Pill tone="amber">Hechos de ejemplo · el archivo no fue leído</Pill></div>}
       </div>
       <div className="eyebrow mb-1.5">Matriz de contraste normativo</div>
       <div className="space-y-2">

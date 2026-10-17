@@ -50,13 +50,10 @@ export function LibraryPage() {
           </>
         }
       />
-      {services.mode === "demo" && (
-        <div className="mb-4 flex flex-wrap gap-2.5 text-[11px] text-muted-foreground">
-          <span className="rounded-lg border border-border bg-card px-3 py-2"><strong className="text-foreground">{docs?.length ?? "—"}</strong> documentos registrados</span>
-          <span className="rounded-lg border border-border bg-card px-3 py-2">Fecha de referencia: <strong className="text-foreground">{fmtDate(date)}</strong></span>
-          <span className="rounded-lg bg-warning-soft px-3 py-2 font-semibold text-warning">Datos de prueba ficticios</span>
-        </div>
-      )}
+      <div className="mb-4 flex flex-wrap gap-2.5 text-[11px] text-muted-foreground">
+        <span>{docs?.length ?? "—"} documentos registrados</span>
+        <span>Fecha de referencia: {fmtDate(date)}</span>
+      </div>
       <div className="mb-4 flex flex-wrap items-center gap-2.5">
         <input className={`${field} min-w-[260px] flex-1`} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por código, título, versión o responsable..." aria-label="Buscar documentos" />
         <select className={field} value={type} onChange={(e) => setType(e.target.value)} aria-label="Tipo">
@@ -84,7 +81,7 @@ export function LibraryPage() {
             <tbody>
               {isLoading && <tr><td colSpan={6}><Empty>Cargando documentos…</Empty></td></tr>}
               {isError && <tr><td colSpan={6}><Empty>No se pudo cargar la biblioteca. <button className="underline" onClick={() => refetch()}>Reintentar</button></Empty></td></tr>}
-              {docs && rows.length === 0 && <tr><td colSpan={6}><Empty>No hay documentos que coincidan con los filtros.</Empty></td></tr>}
+              {docs && rows.length === 0 && <tr><td colSpan={6}><Empty>{docs.length === 0 ? "No hay documentos normativos registrados. El guardado de archivos aún no está conectado." : "No hay documentos que coincidan con los filtros."}</Empty></td></tr>}
               {rows.map(({ d, a }) => (
                 <tr key={d.code} onClick={() => navigate({ to: "/biblioteca/$code", params: { code: d.code } })} className="cursor-pointer border-t border-border transition-colors hover:bg-accent">
                   <td className="px-4 py-3"><div className="doc-code">{d.code}</div><div className="font-semibold">{d.title}</div><div className="text-[11px] text-muted-foreground">{d.classification}</div></td>

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
@@ -55,8 +54,8 @@ export function UploadTray({
   const total = files.reduce((s, f) => s + f.size, 0);
   const close = (o: boolean) => { onOpenChange(o); if (!o) setFiles([]); };
   const confirm = () => {
-    if (onConfirm) onConfirm(files);
-    else toast(`${files.length} documento(s) en cola. El guardado se habilitará con el backend.`);
+    if (!onConfirm) return;
+    onConfirm(files);
     close(false);
   };
 
@@ -105,10 +104,10 @@ export function UploadTray({
           </ul>
         </div>
 
-        <p className="text-[11px] text-muted-foreground">Versión de prueba: los archivos aún no se guardan ni se leen.</p>
+        <p className="text-[11px] text-muted-foreground">{onConfirm ? "Archivos seleccionados en este navegador; aún no se guardan ni se analizan." : "El guardado de documentos aún no está conectado. Los archivos seleccionados no se han cargado."}</p>
         <DialogFooter>
           <Button variant="outline" className="rounded-full" onClick={() => close(false)}>Cancelar</Button>
-          <Button className="rounded-full" disabled={!files.length && !onConfirm} onClick={confirm}>
+          <Button className="rounded-full" disabled={!onConfirm} onClick={confirm}>
             {confirmLabel} {files.length || ""} documento{files.length === 1 ? "" : "s"}
           </Button>
         </DialogFooter>

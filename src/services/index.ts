@@ -1,32 +1,14 @@
-/**
- * Service layer. UI only talks to `services`. Today it is wired to the demo
- * provider; swap `demoProvider` for a backend provider (server functions)
- * implementing the same interface without touching components.
- */
-import type {
-  ConsultAnswer,
-  NormativeDocument,
-  ValidationFinding,
-} from "@/lib/domain/types";
-import { runLocalChecks } from "@/lib/domain/validity";
-import {
-  DEMO_REFERENCE_DATE,
-  demoAnswers,
-  demoCaseContrast,
-  demoDocuments,
-  insufficientAnswer,
-} from "@/lib/demo/fixtures";
+/** UI accesses document and consultation operations only through this contract. */
+import type { ConsultAnswer, NormativeDocument, ValidationFinding } from "@/lib/domain/types";
 
 export interface ProcessingStatus {
   documentCode: string;
   stage: "no_disponible" | "en_cola" | "procesando" | "indexado" | "error";
   detail: string;
 }
-
 export type ConsultStage = "consulta" | "recuperacion" | "vigencia" | "respuesta";
-
 export interface HorizonteServices {
-  mode: "demo" | "backend";
+  mode: "unconfigured" | "backend";
   referenceDate: () => string;
   listDocuments: () => Promise<NormativeDocument[]>;
   getDocument: (code: string) => Promise<NormativeDocument | null>;
@@ -35,63 +17,23 @@ export interface HorizonteServices {
   getProcessingStatus: (code: string) => Promise<ProcessingStatus>;
   uploadDocument: (file: File) => Promise<never>;
 }
-
-const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
 export class NotImplementedError extends Error {}
 
-const demoProvider: HorizonteServices = {
-  mode: "demo",
-  referenceDate: () => DEMO_REFERENCE_DATE,
-  async listDocuments() {
-    await delay(150);
-    return demoDocuments;
+// Cloud is enabled, but document storage and analysis are not wired yet.
+// Fail closed: no sample records, invented findings, or fabricated answers.
+export const services: HorizonteServices = {
+  mode: "unconfigured",
+  referenceDate: () => new Date().toISOString().slice(0, 10),
+  async listDocuments() { return []; },
+  async getDocument() { return null; },
+  async askQuestion() {
+    throw new NotImplementedError("El análisis de documentos reales aún no está conectado. No se ha generado ninguna respuesta ni contraste.");
   },
-  async getDocument(code) {
-    await delay(100);
-    return demoDocuments.find((d) => d.code === code) ?? null;
-  },
-  async askQuestion(question, onStage, caseFiles = []) {
-    // Simulated timings: the demo has no real pipeline behind these stages.
-    for (const [stage, ms] of [["consulta", 500], ["recuperacion", 1100], ["vigencia", 900], ["respuesta", 600]] as const) {
-      onStage?.(stage);
-      await delay(ms);
-    }
-    const q = question.toLowerCase();
-    const hit = demoAnswers.find((a) => a.match.some((k) => q.includes(k))) ?? insufficientAnswer;
-    const { match: _m, ...rest } = hit;
-    return {
-      ...rest,
-      id: crypto.randomUUID(),
-      question,
-      answeredAt: new Date().toISOString(),
-      source: "demo",
-      ...(caseFiles.length
-        ? {
-            title: "Contraste del caso con la normativa vigente",
-            level: "revision" as const,
-            contrast: { fileNames: caseFiles.map((f) => f.name), summary: demoCaseContrast.summary, items: demoCaseContrast.items },
-            warnings: ["Contraste simulado: el contenido del archivo no fue leído. Los hechos del caso son de ejemplo.", ...rest.warnings],
-          }
-        : {}),
-    };
-  },
-  async runValidations() {
-    await delay(300);
-    return runLocalChecks(demoDocuments, DEMO_REFERENCE_DATE);
-  },
+  async runValidations() { return []; },
   async getProcessingStatus(code) {
-    return {
-      documentCode: code,
-      stage: "no_disponible",
-      detail: "El procesamiento documental aún no está conectado.",
-    };
+    return { documentCode: code, stage: "no_disponible", detail: "El procesamiento documental aún no está conectado." };
   },
   async uploadDocument() {
-    throw new NotImplementedError(
-      "La carga de documentos estará disponible cuando se conecte el almacenamiento y el procesamiento documental.",
-    );
+    throw new NotImplementedError("El guardado de documentos aún no está conectado. Los archivos no se han cargado.");
   },
 };
-
-export const services: HorizonteServices = demoProvider;
