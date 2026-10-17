@@ -80,76 +80,79 @@ export function CaseResult({ answer }: { answer: ConsultAnswer }) {
         </div>
       </section>
 
-      {/* 3. Acciones prioritarias */}
-      {(c.actions?.length ?? 0) > 0 && (
-        <section className="rounded-[18px] border border-border bg-card p-5 shadow-soft">
-          <h3 className="mb-2.5 text-[14px] font-semibold">Qué hacer ahora</h3>
-          <ol className="space-y-2">
-            {[...c.actions!].sort((a, b) => ["alta", "media", "baja"].indexOf(a.priority) - ["alta", "media", "baja"].indexOf(b.priority)).map((a, i) => (
-              <li key={i} className="flex items-start gap-3 text-[13px] leading-relaxed">
-                <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">{i + 1}</span>
-                <span className="min-w-0 flex-1">{a.text}</span>
-                <span className="flex shrink-0 items-center gap-2">
-                  <Pill tone={prioTone[a.priority]}>Prioridad {a.priority}</Pill>
-                  {a.findingIndex !== null && (
-                    <button type="button" onClick={() => focus(a.findingIndex!)} className="text-[10px] text-foreground underline">Ver hallazgo</button>
-                  )}
-                </span>
-              </li>
-            ))}
-          </ol>
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)]">
+        {/* Columna principal: hallazgos */}
+        <section className="min-w-0">
+          <div className="mb-2 flex items-center justify-between px-1">
+            <h3 className="text-[14px] font-semibold">Hallazgos {filter && <span className="font-normal text-muted-foreground">· {statusMeta[filter].label}</span>}</h3>
+            {filter && <button type="button" onClick={() => setFilter(null)} className="text-[11px] underline">Ver todos</button>}
+          </div>
+          {c.items.length === 0 && <p className="px-1 text-[12px] text-muted-foreground">El análisis no produjo hallazgos.</p>}
+          <div className="space-y-2.5">
+            {order.map((i) => <FindingCard key={i} id={`hallazgo-${i}`} item={c.items[i]!} isCase={isCase} />)}
+          </div>
         </section>
-      )}
 
-      {/* 4. Hallazgos */}
-      <section>
-        <div className="mb-2 flex items-center justify-between px-1">
-          <h3 className="text-[14px] font-semibold">Hallazgos {filter && <span className="font-normal text-muted-foreground">· {statusMeta[filter].label}</span>}</h3>
-          {filter && <button type="button" onClick={() => setFilter(null)} className="text-[11px] underline">Ver todos</button>}
-        </div>
-        {c.items.length === 0 && <p className="px-1 text-[12px] text-muted-foreground">El análisis no produjo hallazgos.</p>}
-        <div className="space-y-2.5">
-          {order.map((i) => <FindingCard key={i} id={`hallazgo-${i}`} item={c.items[i]!} isCase={isCase} />)}
-        </div>
-      </section>
+        {/* Panel lateral de acción */}
+        <aside className="space-y-3 lg:sticky lg:top-4">
+          {(c.actions?.length ?? 0) > 0 && (
+            <section className="rounded-[18px] border border-border bg-card p-4 shadow-soft">
+              <h3 className="mb-2.5 text-[13px] font-semibold">Qué hacer ahora</h3>
+              <ol className="space-y-2.5">
+                {[...c.actions!].sort((a, b) => ["alta", "media", "baja"].indexOf(a.priority) - ["alta", "media", "baja"].indexOf(b.priority)).map((a, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-[12px] leading-relaxed">
+                    <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">{i + 1}</span>
+                    <div className="min-w-0 flex-1">
+                      <p>{a.text}</p>
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
+                        <Pill tone={prioTone[a.priority]}>Prioridad {a.priority}</Pill>
+                        {a.findingIndex !== null && (
+                          <button type="button" onClick={() => focus(a.findingIndex!)} className="text-[10px] text-foreground underline">Ver hallazgo</button>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
 
-      {/* 5. Información faltante */}
-      {(c.missingInfo?.length ?? 0) > 0 && (
-        <section className="rounded-[18px] border border-border bg-card p-5 shadow-soft">
-          <h3 className="mb-2 text-[14px] font-semibold">Información que falta para cerrar el caso</h3>
-          <ul className="space-y-1.5 text-[13px]">
-            {c.missingInfo!.map((m) => (
-              <li key={m} className="flex gap-2"><span aria-hidden className="text-muted-foreground">☐</span>{m}</li>
-            ))}
-          </ul>
-        </section>
-      )}
+          {(c.missingInfo?.length ?? 0) > 0 && (
+            <section className="rounded-[18px] border border-border bg-card p-4 shadow-soft">
+              <h3 className="mb-2 text-[13px] font-semibold">Información faltante</h3>
+              <ul className="space-y-1.5 text-[12px]">
+                {c.missingInfo!.map((m) => (
+                  <li key={m}><label className="flex cursor-pointer gap-2"><input type="checkbox" className="mt-0.5 accent-primary" />{m}</label></li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-      {/* 6. Normativa usada */}
-      {(c.normNames?.length ?? 0) > 0 && (
-        <section className="rounded-[18px] border border-border bg-card p-5 shadow-soft">
-          <h3 className="mb-2 text-[14px] font-semibold">Normativa consultada</h3>
-          <ul className="space-y-1.5">
-            {c.normNames!.map((n) => (
-              <li key={n.id} className="flex flex-wrap items-center justify-between gap-2 text-[12px]">
-                <span className="min-w-0 truncate">{n.name}</span>
-                <span className="flex items-center gap-2">
-                  <Pill tone="amber">Vigencia pendiente de validación</Pill>
-                  <Link to="/biblioteca/$code" params={{ code: n.id }} className="text-[11px] underline">Ver ficha</Link>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+          {(c.normNames?.length ?? 0) > 0 && (
+            <section className="rounded-[18px] border border-border bg-card p-4 shadow-soft">
+              <h3 className="mb-2 text-[13px] font-semibold">Normativa aplicada</h3>
+              <ul className="space-y-2">
+                {c.normNames!.map((n) => (
+                  <li key={n.id} className="rounded-xl bg-secondary px-3 py-2 text-[12px]">
+                    <div className="truncate font-medium">{n.name}</div>
+                    <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+                      <Pill tone="amber">Vigencia pendiente de validación</Pill>
+                      <Link to="/biblioteca/$code" params={{ code: n.id }} className="text-[11px] underline">Ver ficha</Link>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-      {/* 7. Advertencias */}
-      {answer.warnings.length > 0 && (
-        <section className="rounded-xl bg-warning-soft px-4 py-3 text-[12px] leading-relaxed text-warning">
-          <strong className="mb-1 block">Advertencias</strong>
-          <ul className="list-disc space-y-0.5 pl-5">{answer.warnings.map((w) => <li key={w}>{w}</li>)}</ul>
-        </section>
-      )}
+          {answer.warnings.length > 0 && (
+            <section className="rounded-[18px] bg-warning-soft px-4 py-3 text-[12px] leading-relaxed text-warning">
+              <strong className="mb-1 block">Advertencias técnicas</strong>
+              <ul className="list-disc space-y-0.5 pl-5">{answer.warnings.map((w) => <li key={w}>{w}</li>)}</ul>
+            </section>
+          )}
+        </aside>
+      </div>
     </article>
   );
 }
