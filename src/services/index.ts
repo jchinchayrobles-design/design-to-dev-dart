@@ -22,12 +22,14 @@ export interface ProcessingStatus {
   detail: string;
 }
 
+export type ConsultStage = "consulta" | "recuperacion" | "vigencia" | "respuesta";
+
 export interface HorizonteServices {
   mode: "demo" | "backend";
   referenceDate: () => string;
   listDocuments: () => Promise<NormativeDocument[]>;
   getDocument: (code: string) => Promise<NormativeDocument | null>;
-  askQuestion: (question: string) => Promise<ConsultAnswer>;
+  askQuestion: (question: string, onStage?: (stage: ConsultStage) => void) => Promise<ConsultAnswer>;
   runValidations: () => Promise<ValidationFinding[]>;
   getProcessingStatus: (code: string) => Promise<ProcessingStatus>;
   uploadDocument: (file: File) => Promise<never>;
@@ -48,8 +50,12 @@ const demoProvider: HorizonteServices = {
     await delay(100);
     return demoDocuments.find((d) => d.code === code) ?? null;
   },
-  async askQuestion(question) {
-    await delay(900);
+  async askQuestion(question, onStage) {
+    // Simulated timings: the demo has no real pipeline behind these stages.
+    for (const [stage, ms] of [["consulta", 500], ["recuperacion", 1100], ["vigencia", 900], ["respuesta", 600]] as const) {
+      onStage?.(stage);
+      await delay(ms);
+    }
     const q = question.toLowerCase();
     const hit = demoAnswers.find((a) => a.match.some((k) => q.includes(k))) ?? insufficientAnswer;
     const { match: _m, ...rest } = hit;
