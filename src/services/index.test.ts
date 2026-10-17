@@ -14,8 +14,8 @@ describe("Real data only", () => {
     await expect(services.askQuestion("vigencia y límites", (stage) => stages.push(stage))).rejects.toBeInstanceOf(NotImplementedError);
     expect(stages).toEqual([]);
   });
-  it("does not report an upload or processing as successful", async () => {
-    await expect(services.uploadDocument(new File(["caso"], "caso.txt"))).rejects.toBeInstanceOf(NotImplementedError);
+  it("requires a session before reporting an upload as successful", async () => {
+    await expect(services.uploadDocument(new File(["caso"], "caso.txt"))).rejects.toThrow("Inicia sesión");
     expect((await services.getProcessingStatus("caso")).stage).toBe("no_disponible");
   });
 });
